@@ -1,0 +1,15 @@
+<resources>
+    <string name="app_name">Movie Box</string>
+    <string name="logo">logo</string>
+    <string name="sort_by_popularity">Most Popular</string>
+    <string name="sort_by_rating">Top Rated</string>
+    <string name="sort_by">Sort by</string>
+    <string name="original_name_lbl">Original Name</string>
+    <string name="overview_lbl">Overview</string>
+    <string name="genres_lbl">Genres</string>
+    <string name="popularity_lbl">Popularity</string>
+    <string name="error_message">Oops , something went wrong</string>
+    <string name="image_back_drop">image backdrop</string>
+    <string name="image_poster">image poster</string>
+    <string name="image_list">image list</string>
+</resources>
