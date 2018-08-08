@@ -121,7 +121,7 @@ public class JsonUtils {
                 parsedMovieObj.setGenres(genres);
             }
             String releaseDateStr = jsonMovieObj.optString(Release_Date);
-            DateFormat format = new SimpleDateFormat("YYYY-MM-DD", Locale.ENGLISH);
+            DateFormat format = new SimpleDateFormat("yyyy-MM-DD", Locale.ENGLISH);
             Date date = format.parse(releaseDateStr);
             Log.d(TAG  , date.toString());
             parsedMovieObj.setReleaseDate(date);
