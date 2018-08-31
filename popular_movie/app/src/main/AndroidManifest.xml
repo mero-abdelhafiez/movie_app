@@ -21,6 +21,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <provider
+            android:authorities="com.example.android.popular_movie"
+            android:name=".Data.MovieDBContentProvider"
+            android:exported="false"
+            />
     </application>
 
 </manifest>

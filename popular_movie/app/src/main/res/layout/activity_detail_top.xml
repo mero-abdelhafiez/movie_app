@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <ImageView
+        android:contentDescription="@string/image_back_drop"
+        android:id="@+id/iv_movie_backdrop"
+        android:layout_width="match_parent"
+        android:layout_height="150dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.75"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/noimage"
+        android:scaleType="centerCrop"/>
+
+    <ImageView
+        android:contentDescription="@string/image_poster"
+        android:id="@+id/iv_movie_poster"
+        android:layout_width="120dp"
+        android:layout_height="132dp"
+        android:layout_marginEnd="40dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="40dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="140dp"
+        android:background="@color/colorWhite"
+        android:padding="2dp"
+        android:scaleType="centerInside"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.174"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/noimage" />
+
+    <ImageView
+        android:id="@+id/rb_movie_rating"
+        android:layout_width="28dp"
+        android:layout_height="29dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginLeft="16dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/star"
+        app:layout_constraintEnd_toStartOf="@+id/tv_movie_rating"
+        app:layout_constraintHorizontal_bias="0.761"
+        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
+        app:layout_constraintTop_toBottomOf="@+id/iv_movie_backdrop" />
+
+    <TextView
+        android:id="@+id/tv_movie_rating"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rb_movie_rating"
+        app:layout_constraintTop_toBottomOf="@+id/iv_movie_backdrop"
+        tools:text="rating" />
+
+    <TextView
+        android:id="@+id/tv_movie_rate_count"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="8dp"
+        android:textSize="10sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/rb_movie_rating"
+        app:layout_constraintTop_toBottomOf="@+id/tv_movie_rating"
+        tools:text="rating count" />
+
+    <CheckBox
+        android:id="@+id/fav_btn"
+        android:layout_width="38dp"
+        android:layout_height="33dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginStart="28dp"
+        android:button="@drawable/fav_btn_selector"
+        app:layout_constraintBaseline_toBaselineOf="@+id/add_to_fav_lbl"
+        app:layout_constraintEnd_toStartOf="@+id/add_to_fav_lbl"
+        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster" />
+
+    <TextView
+        android:id="@+id/add_to_fav_lbl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="16dp"
+        android:layout_marginRight="16dp"
+        android:layout_marginTop="16dp"
+        android:text="@string/add_to_fav_lbl"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/tv_movie_rate_count" />
+
+</android.support.constraint.ConstraintLayout>

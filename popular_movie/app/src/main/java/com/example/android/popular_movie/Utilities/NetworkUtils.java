@@ -26,7 +26,11 @@ public class NetworkUtils {
     // Base URLS
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
     private static final String BASE_GENRE_URL = "https://api.themoviedb.org/3/genre/movie/list";
+    private static final String BASE_TRAILER_URL = "http://api.themoviedb.org/3/movie/{id}/videos";
+    private static final String BASE_REVIEWS_URL = "http://api.themoviedb.org/3/movie/{id}/reviews";
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
+
+    private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch";
 
     // Paths
     private static final String POPULARITY = "popular";
@@ -36,6 +40,7 @@ public class NetworkUtils {
     private static final String KEY_PARAM = "api_key";
     private static final String SORT_PARAM = "sort_by";
     private static final String LANG_PARAM = "language";
+    private static final String VIDEO_PARAM = "v";
 
     // Data
     private static final String[] AVAILABLE_IMAGE_SIZES = {"w92", "w154", "w185", "w342", "w500", "w780","original"};
@@ -43,7 +48,7 @@ public class NetworkUtils {
     // Build the GET movie list query URL
     public static URL BuildQueryMovieURL (){
         String sortBy = "";
-        if(UserPreference.getSortByRating()){
+        if(UserPreference.getSortType() == 1){
             sortBy = RATING;
         }else{
             sortBy = POPULARITY;
@@ -71,6 +76,49 @@ public class NetworkUtils {
         try{
             url = new URL(uri.toString());
         }catch (MalformedURLException e){
+
+        }
+        return url;
+    }
+
+    // Build GET trailers query URL
+    public static URL BuildQueryTrailerUrl(String movieId){
+        String baseUrlWithID = BASE_TRAILER_URL.replace("{Id}" , movieId);
+        Uri  uri = Uri.parse(baseUrlWithID).buildUpon()
+                .appendQueryParameter(KEY_PARAM , V3KEY)
+                .build();
+        URL url = null;
+        try{
+            url = new URL(uri.toString());
+        }catch(MalformedURLException e){
+
+        }
+        return url;
+    }
+
+    // Build GET reviews query URL
+    public static URL BuildQueryReviewsUrl(String movieId){
+        String baseUrlWithID = BASE_REVIEWS_URL.replace("{Id}" , movieId);
+        Uri  uri = Uri.parse(baseUrlWithID).buildUpon()
+                .appendQueryParameter(KEY_PARAM , V3KEY)
+                .build();
+        URL url = null;
+        try{
+            url = new URL(uri.toString());
+        }catch(MalformedURLException e){
+
+        }
+        return url;
+    }
+
+    public static URL BuildYoutubeUrl(String videoId){
+        Uri uri = Uri.parse(YOUTUBE_BASE_URL).buildUpon()
+                .appendQueryParameter(VIDEO_PARAM , videoId)
+                .build();
+        URL url = null;
+        try{
+            url = new URL(uri.toString());
+        }catch(MalformedURLException e){
 
         }
         return url;

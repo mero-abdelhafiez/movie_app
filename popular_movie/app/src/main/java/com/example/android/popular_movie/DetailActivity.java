@@ -21,9 +21,10 @@ public class DetailActivity extends AppCompatActivity {
     private Movie movie;
     private ImageView mMoviePoster , mMovieBackdrop;
     private TextView mMovieOriginalTitle , mMovieOverview , mMoviePopularity , mMovieGenres , mMovieRatingText;
-    private RatingBar mMovieRating;
+    //private RatingBar mMovieRating;
     private TextView mMovieRatingCount;
     private SharedPreferences sharedPreferences;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,7 +37,7 @@ public class DetailActivity extends AppCompatActivity {
         mMovieOverview = findViewById(R.id.tv_overview);
         mMoviePopularity = findViewById(R.id.tv_popularity);
         mMovieGenres = findViewById(R.id.tv_genres);
-        mMovieRating = findViewById(R.id.rb_movie_rating);
+        //mMovieRating = findViewById(R.id.rb_movie_rating);
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
         mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
         Intent callingIntent = getIntent();
@@ -63,9 +64,9 @@ public class DetailActivity extends AppCompatActivity {
         mMovieOverview.setText(movie.getOverview());
         mMovieOriginalTitle.setText(movie.getOrigionalName());
         mMoviePopularity.setText(String.valueOf(movie.getPopularity()));
-        mMovieRating.setNumStars(10);
+        //mMovieRating.setNumStars(10);
         mMovieRatingCount.setText(String.valueOf(movie.getRateCount()) + " Votes");
-        mMovieRating.setRating((float) movie.getRating());
+        //mMovieRating.setRating((float) movie.getRating());
         mMovieRatingText.setText(String.valueOf(movie.getRating()) + " / 10");
         Log.d(TAG , String.valueOf(movie.getRating()));
         if(movie.getGenres() != null && movie.getGenres().length > 0){

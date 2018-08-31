@@ -1,11 +1,18 @@
 package com.example.android.popular_movie;
 
 import android.app.Dialog;
+import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
+import android.database.Cursor;
 import android.nfc.Tag;
 import android.os.AsyncTask;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -36,15 +43,22 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.net.URL;
 
-public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler {
+public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler , LoaderManager.LoaderCallbacks<String> {
 
     private static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
     private SharedPreferences sharedPreferences;
     private RecyclerView mMoviesRecyclerView;
     private ProgressBar mLoadingBar;
     private TextView mErrorMessage;
     private MoviesAdapter adapter;
+    private boolean IsLand = false;
+
+    private static int GenresLoaderId = 101;
+    private static int MoviesLoaderId = 102;
+    private static int FavsLoaderId = 103;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,10 +75,22 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadingBar = findViewById(R.id.pb_loading_bar);
         mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
         getMoviesDataFromAPI();
-        GridLayoutManager layoutManager = new GridLayoutManager(this , 2);
+        int span = 2;
+        if(IsLand){
+            span = 3;
+        }else{
+            span = 2;
+        }
+        GridLayoutManager layoutManager = new GridLayoutManager(this , span);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
         mMoviesRecyclerView.setAdapter(adapter);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        IsLand = (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? true : false);
     }
 
     @Override
@@ -94,14 +120,22 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         RadioGroup mSortRadioGroup = (RadioGroup) dialog.findViewById(R.id.rg_sort);
         final RadioButton mRatingRadio = dialog.findViewById(R.id.rd_rating);
         final RadioButton mPopularityRadio = dialog.findViewById(R.id.rd_popularity);
+        final RadioButton mFavoritesRadio = dialog.findViewById(R.id.rd_favorites);
 
         // The radio group doesn't automatically so i have to do this (check and uncheck)
-        if(UserPreference.getSortByRating()){
+        int sortType = UserPreference.getSortType();
+        if(sortType == 1){
             mPopularityRadio.setChecked(false);
             mRatingRadio.setChecked(true);
-        }else{
+            mFavoritesRadio.setChecked(false);
+        }else if(sortType ==2){
             mPopularityRadio.setChecked(true);
             mRatingRadio.setChecked(false);
+            mFavoritesRadio.setChecked(false);
+        }else{
+            mPopularityRadio.setChecked(false);
+            mRatingRadio.setChecked(false);
+            mFavoritesRadio.setChecked(true);
         }
         mSortRadioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -109,14 +143,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 switch (checkedId){
                     case R.id.rd_popularity:
                         mRatingRadio.setChecked(false);
-                        UserPreference.setSortByRating(false);
+                        UserPreference.setSortType(1);
                         break;
                     case R.id.rd_rating:
                         mPopularityRadio.setChecked(false);
-                        UserPreference.setSortByRating(true);
+                        UserPreference.setSortType(2);
+                        break;
+                    case R.id.rd_favorites:
+                        mFavoritesRadio.setChecked(false);
+                        UserPreference.setSortType(3);
                         break;
                 }
                 // make request again and populate the rv
+
                 getMoviesDataFromAPI();
                 dialog.dismiss();
             }
@@ -124,8 +163,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         dialog.show();
     }
     private void getMoviesDataFromAPI(){
-        URL url = NetworkUtils.BuildQueryMovieURL();
-        new MoviesDataQuery().execute(url);
+        if(UserPreference.getSortType() == 3){
+
+        }else {
+            URL url = NetworkUtils.BuildQueryMovieURL();
+            new MoviesDataQuery().execute(url);
+        }
     }
 
     private void getGenresDataFromAPI(){
@@ -155,6 +198,111 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         launchDetailActivity(movie);
     }
 
+
+    @NonNull
+    @Override
+    public Loader<String> onCreateLoader(int id, @Nullable final Bundle args) {
+        if(id == GenresLoaderId){
+
+            return new android.support.v4.content.AsyncTaskLoader<String>(this) {
+                String mGenresData = null;
+                @Override
+                protected void onStartLoading() {
+                    super.onStartLoading();
+                    if(args == null){
+                        return;
+                    }
+                    if(mGenresData != null){
+                        deliverResult(mGenresData);
+                    }else{
+                        forceLoad();
+                    }
+                }
+
+                @Nullable
+                @Override
+                public String loadInBackground() {
+                    String searchQuery = args.getString(SEARCH_QUERY_URL_EXTRA);
+                    if(searchQuery == null || searchQuery.isEmpty()){
+                        return null;
+                    }
+                    try{
+                        URL url = new URL(searchQuery.toString());
+                        String results = NetworkUtils.getQueryResult(url);
+                        return results;
+                    }catch (IOException e){
+                        return null;
+                    }
+                }
+
+                @Override
+                public void deliverResult(@Nullable String data) {
+                    mGenresData = data;
+                    super.deliverResult(data);
+                }
+            };
+        }else if(id == MoviesLoaderId){
+            return new android.support.v4.content.AsyncTaskLoader<String>(this) {
+                String mMoviesData = null;
+
+                @Override
+                protected void onStartLoading() {
+                    super.onStartLoading();
+                    showLoadingSpinner();
+                    if(args == null){
+                        return;
+                    }
+                    if(mMoviesData != null){
+                        deliverResult(mMoviesData);
+                    }else{
+                        forceLoad();
+                    }
+                }
+
+                @Nullable
+                @Override
+                public String loadInBackground() {
+                    String searchQuery = args.getString(SEARCH_QUERY_URL_EXTRA);
+                    if(searchQuery == null || searchQuery.isEmpty()){
+                        return null;
+                    }
+                    try{
+                        URL url = new URL(searchQuery.toString());
+                        String results = NetworkUtils.getQueryResult(url);
+                        return results;
+                    }catch (IOException e){
+                        return null;
+                    }
+                }
+
+                @Override
+                public void deliverResult(@Nullable String data) {
+                    mMoviesData = data;
+                    super.deliverResult(data);
+                }
+            };
+        }else{
+            return new android.support.v4.content.AsyncTaskLoader<String>(this) {
+                Cursor mCursor = null;
+                @Nullable
+                @Override
+                public String loadInBackground() {
+                    return null;
+                }
+            };
+        }
+    }
+
+    @Override
+    public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(@NonNull Loader<String> loader) {
+
+    }
+
     class MoviesDataQuery extends AsyncTask<URL, Void , String>
     {
         @Override
@@ -169,7 +317,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 String queryResult = null;
                 try{
                     queryResult = NetworkUtils.getQueryResult(url);
-
                 }catch(IOException e){
 
                 }
@@ -198,6 +345,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             //textView.setText(movies[0].getOrigionalName() + " " + movies[0].getBackdropPath() + "\n" + str);
         }
     }
+
 
     class GenresDataQuery extends AsyncTask<URL , Void , String>{
 
