@@ -21,7 +21,10 @@ public class DetailActivity extends AppCompatActivity {
     private Movie movie;
     private ImageView mMoviePoster , mMovieBackdrop;
     private TextView mMovieOriginalTitle , mMovieOverview , mMoviePopularity , mMovieGenres , mMovieRatingText;
+<<<<<<< HEAD
     //private RatingBar mMovieRating;
+=======
+>>>>>>> cacce4512404206b3e87db15e02fd72be388d809
     private TextView mMovieRatingCount;
     private SharedPreferences sharedPreferences;
 
@@ -37,7 +40,10 @@ public class DetailActivity extends AppCompatActivity {
         mMovieOverview = findViewById(R.id.tv_overview);
         mMoviePopularity = findViewById(R.id.tv_popularity);
         mMovieGenres = findViewById(R.id.tv_genres);
+<<<<<<< HEAD
         //mMovieRating = findViewById(R.id.rb_movie_rating);
+=======
+>>>>>>> cacce4512404206b3e87db15e02fd72be388d809
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
         mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
         Intent callingIntent = getIntent();
@@ -79,7 +85,6 @@ public class DetailActivity extends AppCompatActivity {
             }
         }else{
             mMovieGenres.setText("Others");
-
         }
     }
 }
