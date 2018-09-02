@@ -82,10 +82,12 @@
 
     <CheckBox
         android:id="@+id/fav_btn"
-        android:layout_width="38dp"
-        android:layout_height="33dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="28dp"
+        android:layout_marginLeft="28dp"
+        android:layout_marginRight="8dp"
         android:button="@drawable/fav_btn_selector"
         app:layout_constraintBaseline_toBaselineOf="@+id/add_to_fav_lbl"
         app:layout_constraintEnd_toStartOf="@+id/add_to_fav_lbl"

@@ -1,13 +1,11 @@
 package com.example.android.popular_movie;
 
 import android.app.Dialog;
-import android.content.AsyncTaskLoader;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
-import android.nfc.Tag;
 import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -17,30 +15,22 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Adapter;
 import android.widget.ProgressBar;
 import android.widget.RadioButton;
 import android.widget.RadioGroup;
-import android.widget.Spinner;
 import android.widget.TextView;
 
-import com.example.android.popular_movie.DataModels.Genre;
-import com.example.android.popular_movie.DataModels.GenresData;
 import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.UserPreference;
 import com.example.android.popular_movie.Utilities.JsonUtils;
 import com.example.android.popular_movie.Utilities.MoviesAdapter;
 import com.example.android.popular_movie.Utilities.NetworkUtils;
 
-import org.json.JSONException;
-
 import java.io.IOException;
-import java.io.Serializable;
 import java.net.URL;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler , LoaderManager.LoaderCallbacks<String> {
@@ -85,6 +75,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
         mMoviesRecyclerView.setAdapter(adapter);
+        getSupportLoaderManager().initLoader(MoviesLoaderId , null , this);
+        getSupportLoaderManager().initLoader(GenresLoaderId , null , this);
     }
 
     @Override
@@ -167,13 +159,32 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
         }else {
             URL url = NetworkUtils.BuildQueryMovieURL();
-            new MoviesDataQuery().execute(url);
+            //new MoviesDataQuery().execute(url);
+            Bundle bundle = new Bundle();
+            bundle.putString(SEARCH_QUERY_URL_EXTRA , url.toString());
+
+            LoaderManager loaderManager = getSupportLoaderManager();
+            Loader<String> moviesLoader = loaderManager.getLoader(MoviesLoaderId);
+            if(moviesLoader != null){
+                loaderManager.restartLoader(MoviesLoaderId , bundle , this);
+            }else{
+                loaderManager.initLoader(MoviesLoaderId , bundle , this);
+            }
         }
     }
 
     private void getGenresDataFromAPI(){
         URL url = NetworkUtils.BuildQueryGenreURL();
-        new GenresDataQuery().execute(url);
+        //new GenresDataQuery().execute(url);
+        Bundle bundle = new Bundle();
+        bundle.putString(SEARCH_QUERY_URL_EXTRA , url.toString());
+        LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> genresLoader = loaderManager.getLoader(GenresLoaderId);
+        if(genresLoader != null){
+            loaderManager.restartLoader(GenresLoaderId , bundle , this);
+        }else{
+            loaderManager.initLoader(GenresLoaderId , bundle , this);
+        }
     }
     private void launchDetailActivity(Movie movie){
         Intent intent = new Intent(MainActivity.this , DetailActivity.class);
@@ -295,7 +306,22 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
+        if(loader.getId() == GenresLoaderId){
+            if(data != null && !data.equals("")){
+                JsonUtils.parseGenreObject(data, MainActivity.this);
+            }else{
 
+            }
+        }else if(loader.getId() == MoviesLoaderId){
+            hideLoadingSpinner();
+            if(data != null && !data.equals("")){
+                Movie[] movies = JsonUtils.parseWholeMoviesData(data);
+                adapter.setMovies(movies);
+
+            }else{
+                showErrorMessage();
+            }
+        }
     }
 
     @Override
@@ -303,77 +329,77 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     }
 
-    class MoviesDataQuery extends AsyncTask<URL, Void , String>
-    {
-        @Override
-        protected void onPreExecute() {
-            showLoadingSpinner();
-        }
+//    class MoviesDataQuery extends AsyncTask<URL, Void , String>
+//    {
+//        @Override
+//        protected void onPreExecute() {
+//            showLoadingSpinner();
+//        }
+//
+//        @Override
+//        protected String doInBackground(URL... urls) {
+//            URL url = urls[0];
+//            if(url != null) {
+//                String queryResult = null;
+//                try{
+//                    queryResult = NetworkUtils.getQueryResult(url);
+//                }catch(IOException e){
+//
+//                }
+//                return queryResult;
+//            }else{
+//                return null;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String queryResult) {
+//            hideLoadingSpinner();
+//            if(queryResult != null && !queryResult.equals("")){
+//                Movie[] movies = JsonUtils.parseWholeMoviesData(queryResult);
+//                adapter.setMovies(movies);
+//
+//            }else{
+//                showErrorMessage();
+//            }
+//            /*
+//            if(genres != null && genres.length > 0){
+//                str = sharedPreferences.getString(String.valueOf(genres[0]),null);
+//                Log.d(TAG,sharedPreferences.getAll().toString());
+//            }
+//            */
+//            //textView.setText(movies[0].getOrigionalName() + " " + movies[0].getBackdropPath() + "\n" + str);
+//        }
+//    }
 
-        @Override
-        protected String doInBackground(URL... urls) {
-            URL url = urls[0];
-            if(url != null) {
-                String queryResult = null;
-                try{
-                    queryResult = NetworkUtils.getQueryResult(url);
-                }catch(IOException e){
 
-                }
-                return queryResult;
-            }else{
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String queryResult) {
-            hideLoadingSpinner();
-            if(queryResult != null && !queryResult.equals("")){
-                Movie[] movies = JsonUtils.parseWholeData(queryResult);
-                adapter.setMovies(movies);
-
-            }else{
-                showErrorMessage();
-            }
-            /*
-            if(genres != null && genres.length > 0){
-                str = sharedPreferences.getString(String.valueOf(genres[0]),null);
-                Log.d(TAG,sharedPreferences.getAll().toString());
-            }
-            */
-            //textView.setText(movies[0].getOrigionalName() + " " + movies[0].getBackdropPath() + "\n" + str);
-        }
-    }
-
-
-    class GenresDataQuery extends AsyncTask<URL , Void , String>{
-
-        @Override
-        protected String doInBackground(URL... urls) {
-            URL url = urls[0];
-            if(url != null) {
-                String queryResult = null;
-                try{
-                    queryResult = NetworkUtils.getQueryResult(url);
-
-                }catch(IOException e){
-
-                }
-                return queryResult;
-            }else{
-                return null;
-            }
-        }
-
-        @Override
-        protected void onPostExecute(String s) {
-
-            if(s != null && !s.equals("")){
-                JsonUtils.parseGenreObject(s, MainActivity.this);
-            }else{
-
-            }
-        }
-    }
+//    class GenresDataQuery extends AsyncTask<URL , Void , String>{
+//
+//        @Override
+//        protected String doInBackground(URL... urls) {
+//            URL url = urls[0];
+//            if(url != null) {
+//                String queryResult = null;
+//                try{
+//                    queryResult = NetworkUtils.getQueryResult(url);
+//
+//                }catch(IOException e){
+//
+//                }
+//                return queryResult;
+//            }else{
+//                return null;
+//            }
+//        }
+//
+//        @Override
+//        protected void onPostExecute(String s) {
+//
+//            if(s != null && !s.equals("")){
+//                JsonUtils.parseGenreObject(s, MainActivity.this);
+//            }else{
+//
+//            }
+//        }
+//    }
 }

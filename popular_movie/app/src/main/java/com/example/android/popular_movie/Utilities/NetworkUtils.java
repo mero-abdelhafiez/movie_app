@@ -31,6 +31,7 @@ public class NetworkUtils {
     private static final String IMAGE_BASE_URL = "http://image.tmdb.org/t/p/";
 
     private static final String YOUTUBE_BASE_URL = "https://www.youtube.com/watch";
+    private static final String YOUTUBE_THUMBNAIL = "http://img.youtube.com/vi/{key}/0.jpg";
 
     // Paths
     private static final String POPULARITY = "popular";
@@ -83,7 +84,7 @@ public class NetworkUtils {
 
     // Build GET trailers query URL
     public static URL BuildQueryTrailerUrl(String movieId){
-        String baseUrlWithID = BASE_TRAILER_URL.replace("{Id}" , movieId);
+        String baseUrlWithID = BASE_TRAILER_URL.replace("{id}" , movieId);
         Uri  uri = Uri.parse(baseUrlWithID).buildUpon()
                 .appendQueryParameter(KEY_PARAM , V3KEY)
                 .build();
@@ -98,7 +99,7 @@ public class NetworkUtils {
 
     // Build GET reviews query URL
     public static URL BuildQueryReviewsUrl(String movieId){
-        String baseUrlWithID = BASE_REVIEWS_URL.replace("{Id}" , movieId);
+        String baseUrlWithID = BASE_REVIEWS_URL.replace("{id}" , movieId);
         Uri  uri = Uri.parse(baseUrlWithID).buildUpon()
                 .appendQueryParameter(KEY_PARAM , V3KEY)
                 .build();
@@ -152,5 +153,9 @@ public class NetworkUtils {
         stringBuilder.append(IMAGE_BASE_URL);
         stringBuilder.append("/" + AVAILABLE_IMAGE_SIZES[pos]).append("/" + relativePath);
         return stringBuilder.toString();
+    }
+
+    public static String getVideoThumbnail(String key){
+        return YOUTUBE_THUMBNAIL.replace("{key}" , key);
     }
 }
