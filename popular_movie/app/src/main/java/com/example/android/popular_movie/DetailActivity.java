@@ -16,8 +16,10 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
 
@@ -72,7 +74,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mMovieRatingImage = (ImageView)findViewById(R.id.rb_movie_rating);
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
         mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
-//        mAddToFavs = (CheckBox) findViewById(R.id.fav_btn);
+        mAddToFavs = (CheckBox) findViewById(R.id.fav_btn);
 //
 //        Picasso.with(this)
 //                .load(R.drawable.fav_btn_selector)
@@ -102,9 +104,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mReviewRecyclerView.setHasFixedSize(true);
         reviewsAdapter = new ReviewsAdapter();
         mReviewRecyclerView.setAdapter(reviewsAdapter);
-//
-//        getSupportLoaderManager().initLoader(ReviewsLoaderId , null , this);
-//        getSupportLoaderManager().initLoader(TrailersLoaderId , null , this);
+
+        getSupportLoaderManager().initLoader(ReviewsLoaderId , null , this);
+        getSupportLoaderManager().initLoader(TrailersLoaderId , null , this);
     }
 
     private void getReviewsDataFromAPI(){

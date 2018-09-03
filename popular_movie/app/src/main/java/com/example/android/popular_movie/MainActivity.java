@@ -117,12 +117,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         // The radio group doesn't automatically so i have to do this (check and uncheck)
         int sortType = UserPreference.getSortType();
         if(sortType == 1){
-            mPopularityRadio.setChecked(false);
-            mRatingRadio.setChecked(true);
-            mFavoritesRadio.setChecked(false);
-        }else if(sortType ==2){
             mPopularityRadio.setChecked(true);
             mRatingRadio.setChecked(false);
+            mFavoritesRadio.setChecked(false);
+        }else if(sortType ==2){
+            mPopularityRadio.setChecked(false);
+            mRatingRadio.setChecked(true);
             mFavoritesRadio.setChecked(false);
         }else{
             mPopularityRadio.setChecked(false);
@@ -135,14 +135,17 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 switch (checkedId){
                     case R.id.rd_popularity:
                         mRatingRadio.setChecked(false);
+                        mFavoritesRadio.setChecked(false);
                         UserPreference.setSortType(1);
                         break;
                     case R.id.rd_rating:
                         mPopularityRadio.setChecked(false);
+                        mFavoritesRadio.setChecked(false);
                         UserPreference.setSortType(2);
                         break;
                     case R.id.rd_favorites:
-                        mFavoritesRadio.setChecked(false);
+                        mRatingRadio.setChecked(false);
+                        mPopularityRadio.setChecked(false);
                         UserPreference.setSortType(3);
                         break;
                 }

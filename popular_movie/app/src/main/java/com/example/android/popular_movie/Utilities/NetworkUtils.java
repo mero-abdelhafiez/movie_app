@@ -50,9 +50,9 @@ public class NetworkUtils {
     public static URL BuildQueryMovieURL (){
         String sortBy = "";
         if(UserPreference.getSortType() == 1){
-            sortBy = RATING;
-        }else{
             sortBy = POPULARITY;
+        }else{
+            sortBy = RATING;
         }
         Uri uri = Uri.parse(BASE_URL).buildUpon()
                 .appendPath(sortBy)
