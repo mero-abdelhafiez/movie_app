@@ -162,7 +162,6 @@ public class JsonUtils {
                         reviews[i] = review;
                     }
                 }
-                Log.v(TAG , reviews[0].getContent());
             } catch (JSONException e) {
                 e.printStackTrace();
             }
@@ -175,6 +174,9 @@ public class JsonUtils {
 
     public static Review parseReviewObject(String jsonReview){
         Review parsedReviewObject = new Review();
+        if(jsonReview == null || jsonReview.equals("")){
+            return null;
+        }
         try{
             JSONObject reviewJsonObject = new JSONObject(jsonReview);
             parsedReviewObject.setId(reviewJsonObject.optString(ReviewID));
@@ -214,7 +216,9 @@ public class JsonUtils {
 
     public static Video parseVideoObject(String videoJson){
         Video parsedVideoObject = new Video();
-
+        if(videoJson == null || videoJson.equals("")){
+            return null;
+        }
         try{
             JSONObject videoJsonObj = new JSONObject(videoJson);
             parsedVideoObject.setId(videoJsonObj.optString(VideoId));

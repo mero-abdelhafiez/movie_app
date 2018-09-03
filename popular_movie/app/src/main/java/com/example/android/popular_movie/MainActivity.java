@@ -1,5 +1,6 @@
 package com.example.android.popular_movie;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.Intent;
@@ -15,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -66,23 +68,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
         getMoviesDataFromAPI();
         int span = 2;
+        IsLand = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) ? true:false;
         if(IsLand){
             span = 3;
         }else{
             span = 2;
         }
+        Log.d(TAG , Integer.toString(span));
         GridLayoutManager layoutManager = new GridLayoutManager(this , span);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
         mMoviesRecyclerView.setAdapter(adapter);
         getSupportLoaderManager().initLoader(MoviesLoaderId , null , this);
         getSupportLoaderManager().initLoader(GenresLoaderId , null , this);
-    }
-
-    @Override
-    public void onConfigurationChanged(Configuration newConfig) {
-        super.onConfigurationChanged(newConfig);
-        IsLand = (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE ? true : false);
     }
 
     @Override

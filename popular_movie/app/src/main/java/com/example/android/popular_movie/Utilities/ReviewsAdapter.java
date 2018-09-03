@@ -25,7 +25,11 @@ public class ReviewsAdapter extends RecyclerView.Adapter<ReviewsAdapter.ReviewAd
 
     public void setReviews(Review[] reviews) {
         this.reviews = reviews;
-        numOfItems = reviews.length;
+        if(reviews == null){
+            numOfItems = 0;
+        }else{
+            numOfItems = reviews.length;
+        }
         notifyDataSetChanged();
     }
 
