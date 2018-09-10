@@ -11,11 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation"></activity>
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation" />
         <activity
             android:name=".DetailActivity"
-            android:parentActivityName=".MainActivity"></activity>
+            android:parentActivityName=".MainActivity" />
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
@@ -31,7 +32,7 @@
             android:authorities="com.example.android.popular_movie"
             android:exported="false" />
 
-        <activity android:name=".ReviewsActivity"></activity>
+        <activity android:name=".ReviewActivity"></activity>
     </application>
 
 </manifest>

@@ -80,7 +80,7 @@ public class MovieDBContentProvider extends ContentProvider {
         int resultId = sUriMatcher.match(uri);
         Uri retUri;
         switch (resultId){
-            case FAV_MOVIE_WITH_ID:
+            case FAV_MOVIE:
                 long id = db.insert(FavoriteListContract.FavoriteListEntry.TABLE_NAME , null , values);
                 if(id > 0){
                     retUri = ContentUris.withAppendedId(FavoriteListContract.FavoriteListEntry.CONTENT_URI , id);
@@ -106,10 +106,15 @@ public class MovieDBContentProvider extends ContentProvider {
             case FAV_MOVIE:
                 deletedCount = db.delete(FavoriteListContract.FavoriteListEntry.TABLE_NAME , selection , selectionArgs);
                 break;
+            case FAV_MOVIE_WITH_ID:
+                String id = uri.getPathSegments().get(1);
+                deletedCount = db.delete(FavoriteListContract.FavoriteListEntry.TABLE_NAME , "_id=?" , new String[]{id});
             default:
                 throw new UnsupportedOperationException("Uri " + uri);
         }
-        getContext().getContentResolver().notifyChange(uri , null);
+        if(deletedCount > 0) {
+            getContext().getContentResolver().notifyChange(uri, null);
+        }
         return deletedCount;
     }
 

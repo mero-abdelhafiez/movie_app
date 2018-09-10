@@ -1,9 +1,12 @@
 package com.example.android.popular_movie;
 
+import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.database.Cursor;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -22,7 +25,9 @@ import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.RatingBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.example.android.popular_movie.Data.FavoriteListContract;
 import com.example.android.popular_movie.DataModels.Genre;
 import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.Review;
@@ -35,6 +40,7 @@ import com.squareup.picasso.Picasso;
 import com.squareup.picasso.Target;
 
 import java.io.IOException;
+import java.net.URI;
 import java.net.URL;
 
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
@@ -75,6 +81,18 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
         mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
         mAddToFavs = (CheckBox) findViewById(R.id.fav_btn);
+        mAddToFavs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if(isChecked){
+                    addMovieToFavorites();
+                    Toast.makeText(DetailActivity.this, "Add To Favs", Toast.LENGTH_SHORT).show();
+                }else{
+                    Toast.makeText(DetailActivity.this, "Remove From Favs", Toast.LENGTH_SHORT).show();
+                    removeMovieFromFavorites();
+                }
+            }
+        });
 //
 //        Picasso.with(this)
 //                .load(R.drawable.fav_btn_selector)
@@ -135,6 +153,34 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }else{
             loaderManager.initLoader(TrailersLoaderId , bundle , this);
         }
+    }
+
+    private void addMovieToFavorites(){
+        ContentResolver resolver = getContentResolver();
+        ContentValues contentValues = new ContentValues();
+        contentValues.put(FavoriteListContract.FavoriteListEntry.BACKDROP_COL , movie.getBackdropPath());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.GENRES_COL , movie.getGenres().toString());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.IMAGE_COL , movie.getPoster_Path());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.Origional_Title , movie.getOrigionalName());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.MOVIE_TITLE_COL , movie.getTitle());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.Overview , movie.getOverview());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.VIDEO_COL , movie.getHasVideoTrailer());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.ID , movie.getID());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.POP_COL , movie.getPopularity());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.RATING_COL , movie.getRating());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.VOTE_CNT_COL , movie.getRateCount());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.Release_Date , movie.getReleaseDate().toString());
+
+        contentValues.put(FavoriteListContract.FavoriteListEntry.Adult , movie.getAdult());
+        resolver.insert(FavoriteListContract.FavoriteListEntry.CONTENT_URI ,contentValues);
+    }
+
+    private void removeMovieFromFavorites(){
+        Uri uri = FavoriteListContract.FavoriteListEntry.CONTENT_URI;
+        String movieId = Integer.toString(movie.getID());
+        uri = uri.buildUpon().appendPath(movieId).build();
+        ContentResolver resolver = getContentResolver();
+        resolver.delete(uri , null , null);
     }
     private void populateFields(Movie movie){
         String imageUrl = NetworkUtils.formImageFullPath(movie.getBackdropPath() , true);
