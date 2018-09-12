@@ -57,6 +57,15 @@ public class MovieDBContentProvider extends ContentProvider {
 
                 break;
             case FAV_MOVIE_WITH_ID:
+                String movieId = uri.getPathSegments().get(1);
+
+                cursor = db.query(FavoriteListContract.FavoriteListEntry.TABLE_NAME,
+                        projection ,
+                        "id=?",
+                        new String[]{movieId},
+                        null,
+                        null,
+                        sortOrder);
                 break;
             default:
                 throw new UnsupportedOperationException("Invalid uri is " +  uri.toString());
@@ -108,7 +117,8 @@ public class MovieDBContentProvider extends ContentProvider {
                 break;
             case FAV_MOVIE_WITH_ID:
                 String id = uri.getPathSegments().get(1);
-                deletedCount = db.delete(FavoriteListContract.FavoriteListEntry.TABLE_NAME , "_id=?" , new String[]{id});
+                deletedCount = db.delete(FavoriteListContract.FavoriteListEntry.TABLE_NAME , "id=?" , new String[]{id});
+                break;
             default:
                 throw new UnsupportedOperationException("Uri " + uri);
         }

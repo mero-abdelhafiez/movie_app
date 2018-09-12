@@ -98,6 +98,25 @@ public class Movie implements Parcelable {
         return genres;
     }
 
+    public String getGenresString(){
+        StringBuilder stringBuilder = new StringBuilder();
+        for (int genre: genres)
+        {
+            stringBuilder.append(Integer.toString(genre) + ",");
+        }
+        return stringBuilder.toString();
+    }
+
+    public int[] getGenresFromString(String genresStr){
+        String[] tokens = genresStr.split(",");
+        int len = tokens.length;
+        int[] genresIds = new int[len];
+        for(int i = 0 ; i < len ; i++){
+            genresIds[i] = Integer.parseInt(tokens[i]);
+        }
+        return genresIds;
+    }
+
     public void setGenres(int[] genres) {
         this.genres = genres;
     }

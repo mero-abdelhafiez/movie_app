@@ -16,7 +16,8 @@
             android:configChanges="keyboardHidden|orientation" />
         <activity
             android:name=".DetailActivity"
-            android:parentActivityName=".MainActivity" />
+            android:parentActivityName=".MainActivity"
+            android:launchMode="singleTop"/>
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
@@ -32,7 +33,7 @@
             android:authorities="com.example.android.popular_movie"
             android:exported="false" />
 
-        <activity android:name=".ReviewActivity"></activity>
+        <activity android:name=".ReviewActivity" android:parentActivityName=".DetailActivity"></activity>
     </application>
 
 </manifest>

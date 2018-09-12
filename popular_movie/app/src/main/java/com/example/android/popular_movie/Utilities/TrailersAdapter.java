@@ -30,7 +30,11 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
 
     public void setVideos(Video[] videos){
         this.videos = videos;
-        numOfItems = videos.length;
+        if(videos != null) {
+            numOfItems = videos.length;
+        }else{
+            numOfItems = 0;
+        }
         notifyDataSetChanged();
     }
 

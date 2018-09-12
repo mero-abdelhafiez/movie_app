@@ -37,8 +37,12 @@ import com.example.android.popular_movie.Utilities.NetworkUtils;
 
 import java.io.IOException;
 import java.net.URL;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler , LoaderManager.LoaderCallbacks<String>  {
 
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadingBar = findViewById(R.id.pb_loading_bar);
         mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
         getMoviesDataFromAPI();
-        getFavoriteMoviesData();
+
         int span = 2;
         IsLand = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) ? true:false;
         if(IsLand){
@@ -85,7 +89,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         }else{
             span = 2;
         }
-        Log.d(TAG , Integer.toString(span));
+
         GridLayoutManager layoutManager = new GridLayoutManager(this , span);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
@@ -212,8 +216,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             movie = new Movie();
             movie.setID(mDataCursor.getInt(mIdCol));
             movie.setOverview(mDataCursor.getString(mOverviewCol));
-            //movie.setReleaseDate(mDataCursor.getString(mReleaseDateCol));
-            //movie.setGenres(mDataCursor.getString(mGenresCol));
+            try {
+                Date ReleaseDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(mDataCursor.getString(mReleaseDateCol));
+
+                movie.setReleaseDate(ReleaseDate);
+            }catch (ParseException e){
+                Log.d(TAG , e.getMessage());
+            }
+            movie.setGenres(movie.getGenresFromString(mDataCursor.getString(mGenresCol)));
             movie.setRateCount(mDataCursor.getInt(mVoteCntCol));
             movie.setPoster_Path(mDataCursor.getString(mImageCol));
             movie.setPopularity(mDataCursor.getDouble(mPopularityCol));

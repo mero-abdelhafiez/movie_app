@@ -203,7 +203,6 @@ public class JsonUtils {
                         videos[i] = video;
                     }
                 }
-                Log.v(TAG , videos[0].getKey());
             } catch (JSONException e) {
 
             }

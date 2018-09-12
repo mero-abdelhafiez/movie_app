@@ -18,17 +18,15 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.RadioGroup;
-import android.widget.RatingBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.android.popular_movie.Data.FavoriteListContract;
-import com.example.android.popular_movie.DataModels.Genre;
 import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.Review;
 import com.example.android.popular_movie.DataModels.Video;
@@ -37,11 +35,11 @@ import com.example.android.popular_movie.Utilities.NetworkUtils;
 import com.example.android.popular_movie.Utilities.ReviewsAdapter;
 import com.example.android.popular_movie.Utilities.TrailersAdapter;
 import com.squareup.picasso.Picasso;
-import com.squareup.picasso.Target;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URL;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
@@ -65,12 +63,25 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private static int TrailersLoaderId = 201;
     private static int ReviewsLoaderId = 202;
 
+    private Button mGoToReviewsButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
+
         Context context = DetailActivity.this;
+
         sharedPreferences = context.getSharedPreferences("GenresDataFile",0);
+        Intent callingIntent = getIntent();
+        if (callingIntent.hasExtra(Intent.EXTRA_TEXT)) {
+            movie = (Movie) callingIntent.getParcelableExtra(Intent.EXTRA_TEXT);
+        }
+//        }else if(savedInstanceState != null && savedInstanceState.containsKey("movie")){
+//            movie = (Movie) savedInstanceState.getParcelable("movie");
+//        }
+
+        // Find the views
         mMoviePoster = findViewById(R.id.iv_movie_poster);
         mMovieBackdrop = findViewById(R.id.iv_movie_backdrop);
         mMovieOriginalTitle = findViewById(R.id.tv_original_name);
@@ -80,7 +91,11 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mMovieRatingImage = (ImageView)findViewById(R.id.rb_movie_rating);
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
         mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
+        //mGoToReviewsButton = (Button) findViewById(R.id.)
         mAddToFavs = (CheckBox) findViewById(R.id.fav_btn);
+
+        mAddToFavs.setChecked(getState());
+
         mAddToFavs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -93,23 +108,20 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
                 }
             }
         });
-//
-//        Picasso.with(this)
-//                .load(R.drawable.fav_btn_selector)
-//                .into((Target) mAddToFavs);
-        //reviewProgressBar = (ProgressBar) findViewById(R.id.reviews_pb);
-        //trailersProgressBar = (ProgressBar) findViewById(R.id.trailer_pb);
-        mReviewRecyclerView = (RecyclerView) findViewById(R.id.reviews_rv);
+
+        mGoToReviewsButton = (Button) findViewById(R.id.open_reviews_btn);
+        mGoToReviewsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                openReviewsActivity();
+            }
+        });
         mTrailersRecyclerView = (RecyclerView) findViewById(R.id.trailers_rv);
 
-        Intent callingIntent = getIntent();
-        if(callingIntent.hasExtra(Intent.EXTRA_TEXT)){
-            movie = (Movie) callingIntent.getParcelableExtra(Intent.EXTRA_TEXT);
-        }
+
         populateFields(movie);
         setTitle(movie.getTitle() + " (" + movie.getYear() + ")");
         getTrailersDataFromAPI();
-        getReviewsDataFromAPI();
 
         RecyclerView.LayoutManager trailersLayoutManager = new LinearLayoutManager(this , LinearLayoutManager.HORIZONTAL , false);
         mTrailersRecyclerView.setLayoutManager(trailersLayoutManager);
@@ -117,30 +129,12 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         trailersAdapter = new TrailersAdapter();
         mTrailersRecyclerView.setAdapter(trailersAdapter);
 
-        RecyclerView.LayoutManager reviewsLayoutManager = new LinearLayoutManager(this , LinearLayoutManager.VERTICAL , false);
-        mReviewRecyclerView.setLayoutManager(reviewsLayoutManager);
-        mReviewRecyclerView.setHasFixedSize(true);
-        reviewsAdapter = new ReviewsAdapter();
-        mReviewRecyclerView.setAdapter(reviewsAdapter);
 
-        getSupportLoaderManager().initLoader(ReviewsLoaderId , null , this);
         getSupportLoaderManager().initLoader(TrailersLoaderId , null , this);
     }
 
-    private void getReviewsDataFromAPI(){
-        URL url = NetworkUtils.BuildQueryReviewsUrl(Integer.toString(movie.getID()));
-        Bundle bundle = new Bundle();
-        bundle.putString(SEARCH_QUERY_URL_EXTRA , url.toString());
 
-        LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> reviewsLoader = loaderManager.getLoader(ReviewsLoaderId);
-        if(reviewsLoader != null){
-            loaderManager.restartLoader(ReviewsLoaderId , bundle , this);
-        }else{
-            loaderManager.initLoader(ReviewsLoaderId , bundle , this);
-        }
-    }
-
+    // Get the Trailers Data from the API
     private void getTrailersDataFromAPI(){
         URL url = NetworkUtils.BuildQueryTrailerUrl(Integer.toString(movie.getID()));
         Bundle bundle = new Bundle();
@@ -155,11 +149,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
+    // Radio Button Methods to add and remove the current movie from the Favorites Database
     private void addMovieToFavorites(){
         ContentResolver resolver = getContentResolver();
         ContentValues contentValues = new ContentValues();
+
         contentValues.put(FavoriteListContract.FavoriteListEntry.BACKDROP_COL , movie.getBackdropPath());
-        contentValues.put(FavoriteListContract.FavoriteListEntry.GENRES_COL , movie.getGenres().toString());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.GENRES_COL , movie.getGenresString());
         contentValues.put(FavoriteListContract.FavoriteListEntry.IMAGE_COL , movie.getPoster_Path());
         contentValues.put(FavoriteListContract.FavoriteListEntry.Origional_Title , movie.getOrigionalName());
         contentValues.put(FavoriteListContract.FavoriteListEntry.MOVIE_TITLE_COL , movie.getTitle());
@@ -169,7 +165,9 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         contentValues.put(FavoriteListContract.FavoriteListEntry.POP_COL , movie.getPopularity());
         contentValues.put(FavoriteListContract.FavoriteListEntry.RATING_COL , movie.getRating());
         contentValues.put(FavoriteListContract.FavoriteListEntry.VOTE_CNT_COL , movie.getRateCount());
-        contentValues.put(FavoriteListContract.FavoriteListEntry.Release_Date , movie.getReleaseDate().toString());
+        Format formatter = new SimpleDateFormat("yyyy-MM-dd");
+        String ReleaseDateStr = formatter.format(movie.getReleaseDate());
+        contentValues.put(FavoriteListContract.FavoriteListEntry.Release_Date , ReleaseDateStr);
 
         contentValues.put(FavoriteListContract.FavoriteListEntry.Adult , movie.getAdult());
         resolver.insert(FavoriteListContract.FavoriteListEntry.CONTENT_URI ,contentValues);
@@ -182,6 +180,20 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         ContentResolver resolver = getContentResolver();
         resolver.delete(uri , null , null);
     }
+
+    private boolean getState(){
+        ContentResolver resolver = getContentResolver();
+        String movieIdStr = Integer.toString(movie.getID());
+        Uri queryUri = FavoriteListContract.FavoriteListEntry.CONTENT_URI.buildUpon().appendPath(movieIdStr).build();
+        Cursor cursor = resolver.query(queryUri,
+                null,null,null,null );
+        if(cursor == null || cursor.getCount() <= 0){
+            return false;
+        }else{
+            return true;
+        }
+    }
+    // Use the movie Data to Populate the fields
     private void populateFields(Movie movie){
         String imageUrl = NetworkUtils.formImageFullPath(movie.getBackdropPath() , true);
         Picasso.with(DetailActivity.this)
@@ -218,50 +230,24 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }
     }
 
-    // Get Reviews and Trailers for that Movie
+
+    private void openReviewsActivity(){
+        Intent intent = new Intent(DetailActivity.this , ReviewActivity.class);
+        intent.putExtra(Intent.EXTRA_TEXT , movie.getID());
+        startActivity(intent);
+    }
+//
+//    @Override
+//    protected void onSaveInstanceState(Bundle outState) {
+//        outState.putParcelable("movie" ,movie);
+//        super.onSaveInstanceState(outState);
+//    }
+
+    // Loader methods to get the trailers data for the movie
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable final Bundle args) {
-        if(id == ReviewsLoaderId){
-            return new AsyncTaskLoader<String>(this) {
-
-                String mReviewsData = null;
-                @Override
-                protected void onStartLoading() {
-                    super.onStartLoading();
-                    if(args == null){
-                        return;
-                    }
-                    if(mReviewsData != null){
-                        deliverResult(mReviewsData);
-                    }else{
-                        forceLoad();
-                    }
-                }
-
-                @Nullable
-                @Override
-                public String loadInBackground() {
-                    String searchQuery = args.getString(SEARCH_QUERY_URL_EXTRA);
-                    if(searchQuery == null || searchQuery.isEmpty()){
-                        return null;
-                    }
-                    try{
-                        URL url = new URL(searchQuery.toString());
-                        String results = NetworkUtils.getQueryResult(url);
-                        return results;
-                    }catch (IOException e){
-                        return null;
-                    }
-                }
-
-                @Override
-                public void deliverResult(@Nullable String data) {
-                    mReviewsData = data;
-                    super.deliverResult(data);
-                }
-            };
-        }else if(id == TrailersLoaderId){
+        if(id == TrailersLoaderId){
             return new AsyncTaskLoader<String>(this) {
                 String mTrailersData = null;
                 @Override
@@ -313,13 +299,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         int loaderId = loader.getId();
-        if(loaderId == ReviewsLoaderId){
-            if(data != null && !data.equals("")){
-                Review[] reviews = JsonUtils.parseWholeReviewsData(data);
-                reviewsAdapter.setReviews(reviews);
-                //reviewProgressBar.setVisibility(View.INVISIBLE);
-            }
-        }else if(loaderId == TrailersLoaderId){
+        if(loaderId == TrailersLoaderId){
             if(data != null && !data.equals("")){
                 Video[] videos = JsonUtils.parseWholeVideosData(data);
                 trailersAdapter.setVideos(videos);
