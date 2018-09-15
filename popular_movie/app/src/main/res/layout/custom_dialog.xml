@@ -31,5 +31,16 @@
             android:layout_gravity="start"
             android:text="@string/sort_by_rating"
             android:textSize="14sp" />
+
+        <RadioButton
+            android:id="@+id/rd_favorites"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
+            android:layoutDirection="rtl"
+            android:textAlignment="textStart"
+            android:layout_gravity="start"
+            android:text="@string/favs_lbl"
+            android:textSize="14sp" />
     </RadioGroup>
 </FrameLayout>

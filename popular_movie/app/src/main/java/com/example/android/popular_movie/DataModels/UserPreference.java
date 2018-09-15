@@ -1,13 +1,13 @@
 package com.example.android.popular_movie.DataModels;
 
 public class UserPreference {
-    private static boolean SortByRating = false;
+    private static int SortType = 1;
 
-    public static void setSortByRating(boolean sort){
-        SortByRating = sort;
+    public static void setSortType(int sort){
+        SortType = sort;
     }
 
-    public static boolean getSortByRating(){
-        return SortByRating;
+    public static int getSortType(){
+        return SortType;
     }
 }

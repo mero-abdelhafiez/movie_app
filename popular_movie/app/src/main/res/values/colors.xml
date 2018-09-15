@@ -8,4 +8,5 @@
     <color name="colorWhite">#FFFFFF</color>
     <color name="colorSplash">#ff33aa</color>
     <color name="colorAccentTransparent">#AAFF4081</color>
+    <color name="colorLightGrey">#ddd6d6</color>
 </resources>

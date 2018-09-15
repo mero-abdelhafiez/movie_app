@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_margin="5dp">
+    <ImageView
+        android:id="@+id/video_thumnnail"
+        android:layout_width="@dimen/video_thumnail_width"
+        android:layout_height="@dimen/video_thumnail_height"
+        android:src="@drawable/noimage"
+        android:scaleType="centerCrop"/>
+    <Button
+        android:id="@+id/play_trailer_btn"
+        android:background="@drawable/ic_play_circle_outline_black_24dp"
+        android:layout_width="@dimen/play_btn_dimen"
+        android:layout_height="@dimen/play_btn_dimen"
+        android:scaleType="fitCenter"
+        android:layout_gravity="center"/>
+</FrameLayout>

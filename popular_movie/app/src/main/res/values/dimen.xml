@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="backdrop_height">150dp</dimen>
+    <dimen name="backdrop_margin">10dp</dimen>
+    <dimen name="poster_width">105dp</dimen>
+    <dimen name="poster_height">132dp</dimen>
+    <dimen name="poster_margin_right">4dp</dimen>
+    <dimen name="poster_margin_left">8dp</dimen>
+    <dimen name="poster_margin_top">140dp</dimen>
+    <dimen name="rect_width">200dp</dimen>
+    <dimen name="rect_height">100dp</dimen>
+    <dimen name="rect_margin">8dp</dimen>
+    <dimen name="rect_margin_top">16dp</dimen>
+    <dimen name="star_image_dimen">30dp</dimen>
+    <dimen name="star_image_margin">8dp</dimen>
+    <dimen name="rating_text">20sp</dimen>
+    <dimen name="rating_margin">8dp</dimen>
+    <dimen name="rating_top">2dp</dimen>
+    <dimen name="rating_count_text">10sp</dimen>
+    <dimen name="rating_count_margin">8dp</dimen>
+    <dimen name="fav_btn_dimen">24dp</dimen>
+    <dimen name="fav_btn_margin">8dp</dimen>
+    <dimen name="fav_lbl_text">10sp</dimen>
+    <dimen name="fav_lbl_text_margin">8dp</dimen>
+    <dimen name="video_thumnail_width">120dp</dimen>
+    <dimen name="video_thumnail_height">100dp</dimen>
+    <dimen name="play_btn_dimen">50dp</dimen>
+    <dimen name="detail_bottom_text_size">14sp</dimen>
+</resources>
