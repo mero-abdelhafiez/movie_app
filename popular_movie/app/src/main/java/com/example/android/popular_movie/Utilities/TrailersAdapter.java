@@ -1,6 +1,8 @@
 package com.example.android.popular_movie.Utilities;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -15,6 +17,8 @@ import com.example.android.popular_movie.DataModels.Video;
 import com.example.android.popular_movie.R;
 import com.squareup.picasso.Picasso;
 
+import java.io.Console;
+import java.net.URL;
 import java.util.zip.Inflater;
 
 public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.TrailersAdapterViewHolder> {
@@ -38,6 +42,7 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
         notifyDataSetChanged();
     }
 
+
     @NonNull
     @Override
     public TrailersAdapterViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
@@ -58,6 +63,17 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
                 .load(videoThumbnailUrl)
                 .error(R.drawable.noimage)
                 .into(holder.mVideoThumbnail);
+
+        final Uri videoUri = NetworkUtils.BuildYoutubeUrl(videos[position].getKey());
+        holder.mPlayButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(Intent.ACTION_VIEW , videoUri);
+                Log.d(TAG , videoUri.toString());
+
+                context.startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -72,15 +88,6 @@ public class TrailersAdapter extends RecyclerView.Adapter<TrailersAdapter.Traile
             super(itemView);
             mPlayButton = (Button) itemView.findViewById(R.id.play_trailer_btn);
             mVideoThumbnail = (ImageView) itemView.findViewById(R.id.video_thumnnail);
-
-            mPlayButton.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    //TODO (1) Open Intent with the trailer on youtube or a browser
-                    //TODO (2)
-                    Toast.makeText(context , "Hello here " , Toast.LENGTH_SHORT);
-                }
-            });
         }
     }
 }

@@ -8,7 +8,7 @@
         android:contentDescription="@string/image_back_drop"
         android:id="@+id/iv_movie_backdrop"
         android:layout_width="match_parent"
-        android:layout_height="150dp"
+        android:layout_height="@dimen/backdrop_height"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.75"
         app:layout_constraintStart_toStartOf="parent"
@@ -19,16 +19,14 @@
     <ImageView
         android:contentDescription="@string/image_poster"
         android:id="@+id/iv_movie_poster"
-        android:layout_width="105dp"
-        android:layout_height="132dp"
-        android:layout_marginEnd="40dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="40dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="140dp"
-
+        android:layout_width="@dimen/poster_width"
+        android:layout_height="@dimen/poster_height"
+        android:layout_marginEnd="@dimen/poster_margin_right"
+        android:layout_marginLeft="@dimen/poster_margin_left"
+        android:layout_marginRight="@dimen/poster_margin_right"
+        android:layout_marginStart="@dimen/poster_margin_left"
+        android:layout_marginTop="@dimen/poster_margin_top"
         android:background="@drawable/image_border"
-
         android:scaleType="centerCrop"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.174"
@@ -36,73 +34,70 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/noimage" />
 
-    <ImageView
-        android:id="@+id/rb_movie_rating"
-        android:layout_width="28dp"
-        android:layout_height="29dp"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="24dp"
-        android:layout_marginTop="24dp"
-        android:src="@drawable/star"
-        app:layout_constraintEnd_toStartOf="@+id/tv_movie_rating"
-        app:layout_constraintHorizontal_bias="0.761"
+    <RelativeLayout
+        android:layout_width="@dimen/rect_width"
+        android:layout_height="@dimen/rect_height"
+        android:layout_marginEnd="@dimen/rect_margin"
+        android:layout_marginLeft="@dimen/rect_margin"
+        android:layout_marginRight="@dimen/rect_margin"
+        android:layout_marginStart="@dimen/rect_margin"
+        android:layout_marginTop="@dimen/rect_margin_top"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/iv_movie_poster"
-        app:layout_constraintTop_toBottomOf="@+id/iv_movie_backdrop" />
+        app:layout_constraintTop_toBottomOf="@id/iv_movie_backdrop">
 
-    <TextView
-        android:id="@+id/tv_movie_rating"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="16dp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/rb_movie_rating"
-        app:layout_constraintTop_toBottomOf="@+id/iv_movie_backdrop"
-        tools:text="rating" />
+        <ImageView
+            android:id="@+id/iv_movie_rating"
+            android:layout_width="@dimen/star_image_dimen"
+            android:layout_height="@dimen/star_image_dimen"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_margin="@dimen/star_image_margin"
+            android:src="@drawable/star" />
 
-    <TextView
-        android:id="@+id/tv_movie_rate_count"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginTop="8dp"
-        android:textSize="10sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/rb_movie_rating"
-        app:layout_constraintTop_toBottomOf="@+id/tv_movie_rating"
-        tools:text="rating count" />
+        <TextView
+            android:id="@+id/tv_movie_rating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textStyle="bold"
+            tools:text="rating"
+            android:textSize="@dimen/rating_text"
+            android:layout_marginRight="@dimen/rating_margin"
+            android:layout_marginLeft="@dimen/rating_margin"
+            android:layout_marginTop="@dimen/rating_margin"
+            android:layout_marginBottom="@dimen/rating_top"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentRight="true"/>
 
-    <CheckBox
-        android:id="@+id/fav_btn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginLeft="24dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginStart="24dp"
-        android:button="@drawable/fav_btn_selector"
-        app:layout_constraintBaseline_toBaselineOf="@+id/add_to_fav_lbl"
-        app:layout_constraintEnd_toStartOf="@+id/add_to_fav_lbl"
-        app:layout_constraintStart_toEndOf="@+id/iv_movie_poster" />
+        <TextView
+            android:id="@+id/tv_movie_rate_count"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="@dimen/rating_count_text"
+            android:layout_alignParentRight="true"
+            android:layout_marginRight="@dimen/rating_count_margin"
+            android:layout_below="@id/tv_movie_rating"
+            tools:text="rating count" />
 
-    <TextView
-        android:id="@+id/add_to_fav_lbl"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
-        android:layout_marginRight="16dp"
-        android:layout_marginTop="16dp"
-        android:text="@string/add_to_fav_lbl"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/tv_movie_rate_count" />
+        <CheckBox
+            android:id="@+id/fav_btn"
+            android:layout_width="@dimen/fav_btn_dimen"
+            android:layout_height="@dimen/fav_btn_dimen"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:button="@drawable/fav_btn_selector"
+            android:layout_margin="@dimen/fav_btn_margin"/>
+
+        <TextView
+            android:id="@+id/add_to_fav_lbl"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_alignParentBottom="true"
+            android:textSize="@dimen/fav_lbl_text"
+            android:layout_margin="@dimen/fav_lbl_text_margin"
+            android:text="@string/add_to_fav_lbl" />
+
+    </RelativeLayout>
 
 </android.support.constraint.ConstraintLayout>

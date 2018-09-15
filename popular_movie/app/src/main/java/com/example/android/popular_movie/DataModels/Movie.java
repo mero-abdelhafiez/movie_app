@@ -2,6 +2,7 @@ package com.example.android.popular_movie.DataModels;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Log;
 import android.widget.RatingBar;
 
 import java.util.Calendar;
@@ -22,6 +23,7 @@ public class Movie implements Parcelable {
     private int[] genres;
     private String BackdropPath;
     private String OrigionalName;
+    private static final String TAG = Movie.class.getSimpleName();
 
     public Movie(){}
     public Movie(Parcel source) {
@@ -111,8 +113,12 @@ public class Movie implements Parcelable {
         String[] tokens = genresStr.split(",");
         int len = tokens.length;
         int[] genresIds = new int[len];
-        for(int i = 0 ; i < len ; i++){
-            genresIds[i] = Integer.parseInt(tokens[i]);
+        try {
+            for (int i = 0; i < len; i++) {
+                genresIds[i] = Integer.parseInt(tokens[i]);
+            }
+        }catch(NumberFormatException e){
+            Log.d(TAG , e.getMessage());
         }
         return genresIds;
     }

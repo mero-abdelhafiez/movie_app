@@ -18,6 +18,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -32,6 +33,7 @@ import com.example.android.popular_movie.Data.FavoriteListContract;
 import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.UserPreference;
 import com.example.android.popular_movie.Utilities.JsonUtils;
+import com.example.android.popular_movie.Utilities.LayoutUtilities;
 import com.example.android.popular_movie.Utilities.MoviesAdapter;
 import com.example.android.popular_movie.Utilities.NetworkUtils;
 
@@ -50,12 +52,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
+    private Context mContext = MainActivity.this;
     private SharedPreferences sharedPreferences;
     private RecyclerView mMoviesRecyclerView;
     private ProgressBar mLoadingBar;
     private TextView mErrorMessage;
     private MoviesAdapter adapter;
     private boolean IsLand = false;
+    private Movie[] FavoriteMovies;
 
     private Cursor mDataCursor;
 
@@ -64,11 +68,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private static int GenresLoaderId = 101;
     private static int MoviesLoaderId = 102;
-    private static int FavsLoaderId = 103;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.d(TAG , "Loading From the start");
+        Log.d(TAG , Integer.toString(UserPreference.getSortType()));
         setContentView(R.layout.activity_main);
         Context context = MainActivity.this;
 
@@ -83,11 +88,27 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         getMoviesDataFromAPI();
 
         int span = 2;
+
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int value = displayMetrics.widthPixels;
+        int valueDp = (int) LayoutUtilities.convertPxToDp(this, (float)value);
+
+        boolean IsLargeScreen = (valueDp > 600);
         IsLand = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) ? true:false;
-        if(IsLand){
+
+
+        if(IsLargeScreen){
             span = 3;
-        }else{
-            span = 2;
+            if(valueDp > 820){
+                span = 4;
+            }
+        }else {
+            if (IsLand) {
+                span = 3;
+            } else {
+                span = 2;
+            }
         }
 
         GridLayoutManager layoutManager = new GridLayoutManager(this , span);
@@ -95,6 +116,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         adapter = new MoviesAdapter(this);
         mMoviesRecyclerView.setAdapter(adapter);
 
+        hideErrorMessage();
         getSupportLoaderManager().initLoader(MoviesLoaderId , null , this);
         getSupportLoaderManager().initLoader(GenresLoaderId , null , this);
     }
@@ -173,6 +195,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     private void getMoviesDataFromAPI(){
+        hideErrorMessage();
         if(UserPreference.getSortType() == 3){
             getFavoriteMoviesData();
         }else {
@@ -208,41 +231,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void getFavoriteMoviesData()
     {
         new FavouriteMoviesDataQuery().execute();
-        List<Movie> movies = new ArrayList<>();
-
-        Movie movie ;
-        if(mDataCursor == null) {return;}
-        while(mDataCursor.moveToNext()){
-            movie = new Movie();
-            movie.setID(mDataCursor.getInt(mIdCol));
-            movie.setOverview(mDataCursor.getString(mOverviewCol));
-            try {
-                Date ReleaseDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(mDataCursor.getString(mReleaseDateCol));
-
-                movie.setReleaseDate(ReleaseDate);
-            }catch (ParseException e){
-                Log.d(TAG , e.getMessage());
-            }
-            movie.setGenres(movie.getGenresFromString(mDataCursor.getString(mGenresCol)));
-            movie.setRateCount(mDataCursor.getInt(mVoteCntCol));
-            movie.setPoster_Path(mDataCursor.getString(mImageCol));
-            movie.setPopularity(mDataCursor.getDouble(mPopularityCol));
-            movie.setOrigionalName(mDataCursor.getString(mOrigionalTitleCol));
-            movie.setTitle(mDataCursor.getString(mTitleCol));
-            movie.setBackdropPath(mDataCursor.getString(mBacdropCol));
-            movie.setRating(mDataCursor.getDouble(mRatingCol));
-            movie.setAdult((mDataCursor.getInt(mAdultCol) == 0) ? false : true);
-            movie.setHasVideoTrailer((mDataCursor.getInt(mVideoCol) == 0) ? false : true);
-            movies.add(movie);
-        }
-        hideLoadingSpinner();
-        if(movies == null){
-            showErrorMessage();
-        }else {
-            int len = movies.toArray().length;
-            Movie[] moviesArray = movies.toArray(new Movie[len]);
-            adapter.setMovies( moviesArray);
-        }
+//        if(FavoriteMovies!= null){
+//            setDataToTheAdapter();
+//            Log.d(TAG , "Data Was Set to the Adapter");
+//        }
     }
 
     private void launchDetailActivity(Movie movie){
@@ -252,7 +244,12 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     private void showErrorMessage(){
+        mMoviesRecyclerView.setVisibility(View.INVISIBLE);
         mErrorMessage.setVisibility(View.VISIBLE);
+    }
+    private void hideErrorMessage(){
+        mErrorMessage.setVisibility(View.INVISIBLE);
+        mMoviesRecyclerView.setVisibility(View.VISIBLE);
     }
 
     private void showLoadingSpinner(){
@@ -353,14 +350,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                     super.deliverResult(data);
                 }
             };
-        }else if(id == FavsLoaderId){
-            return new AsyncTaskLoader<String>(this) {
-                @Nullable
-                @Override
-                public String loadInBackground() {
-                    return null;
-                }
-            };
         }else{
             return new android.support.v4.content.AsyncTaskLoader<String>(this) {
                 Cursor mCursor = null;
@@ -388,6 +377,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 adapter.setMovies(movies);
 
             }else{
+                mErrorMessage.setText(mContext.getString(R.string.error_message));
                 showErrorMessage();
             }
         }
@@ -399,6 +389,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     }
 
     class FavouriteMoviesDataQuery extends AsyncTask<Void , Void , Cursor>{
+        @Override
+        protected void onPreExecute() {
+            super.onPreExecute();
+            showLoadingSpinner();
+        }
 
         @Override
         protected Cursor doInBackground(Void... voids) {
@@ -406,7 +401,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
             Cursor cursor = resolver.query(FavoriteListContract.FavoriteListEntry.CONTENT_URI
             , null , null , null , null);
-
             return cursor;
         }
 
@@ -414,24 +408,78 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         protected void onPostExecute(Cursor cursor) {
             super.onPostExecute(cursor);
             mDataCursor = cursor;
-
-            // Get Coloumns index
-            mIdCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.ID);
-            mAdultCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Adult);
-            mBacdropCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.BACKDROP_COL);
-            mGenresCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.GENRES_COL);
-            mImageCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.IMAGE_COL);
-            mOverviewCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Overview);
-            mPopularityCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.POP_COL);
-            mRatingCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.RATING_COL);
-            mReleaseDateCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Release_Date);
-            mOrigionalTitleCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Origional_Title);
-            mTitleCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.MOVIE_TITLE_COL);
-            mVideoCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.VIDEO_COL);
-            mVoteCntCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.VOTE_CNT_COL);
+            if(mDataCursor == null){
+                mErrorMessage.setText(mContext.getString(R.string.favorite_list_empty_message));
+                showErrorMessage();
+                hideLoadingSpinner();
+            }
+            getColumnIndicies(mDataCursor);
+            convertCursorToList();
         }
     }
 
+    private void getColumnIndicies(Cursor cursor){
+        if(cursor == null) return;
+        mIdCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.ID);
+        mAdultCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Adult);
+        mBacdropCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.BACKDROP_COL);
+        mGenresCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.GENRES_COL);
+        mImageCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.IMAGE_COL);
+        mOverviewCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Overview);
+        mPopularityCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.POP_COL);
+        mRatingCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.RATING_COL);
+        mReleaseDateCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Release_Date);
+        mOrigionalTitleCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.Origional_Title);
+        mTitleCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.MOVIE_TITLE_COL);
+        mVideoCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.VIDEO_COL);
+        mVoteCntCol = cursor.getColumnIndex(FavoriteListContract.FavoriteListEntry.VOTE_CNT_COL);
+    }
+
+    private void convertCursorToList(){
+        List<Movie> movies = new ArrayList<>();
+        Movie movie;
+        if (mDataCursor == null) {
+            return;
+        }
+        while (mDataCursor.moveToNext()) {
+            movie = new Movie();
+            movie.setID(mDataCursor.getInt(mIdCol));
+            movie.setOverview(mDataCursor.getString(mOverviewCol));
+            try {
+                Date ReleaseDate = new SimpleDateFormat("yyyy-MM-dd", Locale.ENGLISH).parse(mDataCursor.getString(mReleaseDateCol));
+
+                movie.setReleaseDate(ReleaseDate);
+            } catch (ParseException e) {
+                Log.d(TAG, e.getMessage());
+            }
+            movie.setGenres(movie.getGenresFromString(mDataCursor.getString(mGenresCol)));
+            movie.setRateCount(mDataCursor.getInt(mVoteCntCol));
+            movie.setPoster_Path(mDataCursor.getString(mImageCol));
+            movie.setPopularity(mDataCursor.getDouble(mPopularityCol));
+            movie.setOrigionalName(mDataCursor.getString(mOrigionalTitleCol));
+            movie.setTitle(mDataCursor.getString(mTitleCol));
+            movie.setBackdropPath(mDataCursor.getString(mBacdropCol));
+            movie.setRating(mDataCursor.getDouble(mRatingCol));
+            movie.setAdult((mDataCursor.getInt(mAdultCol) == 0) ? false : true);
+            movie.setHasVideoTrailer((mDataCursor.getInt(mVideoCol) == 0) ? false : true);
+            movies.add(movie);
+        }
+        if(movies != null ){
+            int len = movies.toArray().length;
+            FavoriteMovies = movies.toArray(new Movie[len]);
+            setDataToTheAdapter();
+            if(movies.size() == 0){
+                mErrorMessage.setText(mContext.getString(R.string.favorite_list_empty_message));
+                showErrorMessage();
+            }
+        }
+        hideLoadingSpinner();
+
+    }
+
+    private void setDataToTheAdapter(){
+        adapter.setMovies(FavoriteMovies);
+    }
     @Override
     protected void onDestroy() {
         super.onDestroy();

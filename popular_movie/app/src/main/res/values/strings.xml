@@ -14,5 +14,9 @@
     <string name="image_poster">image poster</string>
     <string name="image_list">image list</string>
     <string name="add_to_fav_lbl">Add To Favorites</string>
+    <string name="remove_to_fav_lbl">Remove From Favorites</string>
     <string name="go_to_reviews">See Reviews</string>
+    <string name="reviews_error_message">No Reviews Available</string>
+    <string name="no_trailers_text_message">No Trailers Available For This Movie</string>
+    <string name="favorite_list_empty_message">No Movies Added To The List</string>
 </resources>

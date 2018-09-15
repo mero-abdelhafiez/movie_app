@@ -18,10 +18,9 @@ public class NetworkUtils {
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
     // Authentication
-    private static final String V3KEY = "c1a676d5a618b1591ae9746d3eb8562e";
-    private static final String V4KEY = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJjMWE2NzZkNWE2MThiMT" +
-            "U5MWFlOTc0NmQzZWI4NTYyZSIsInN1YiI6IjViMGEwYjA3YzNhMzY4NGE0YzAwMGFmNCIsInNjb3BlcyI6WyJhcGlfcmVhZ" +
-            "CJdLCJ2ZXJzaW9uIjoxfQ.E496eEe5sFnhiHmd7cDIiVTRJ77-3ie8m7ASN_uYjQw";
+    //TODO: Add Movie API Authentication Key here
+    private static final String V3KEY = "";
+    private static final String V4KEY = "";
 
     // Base URLS
     private static final String BASE_URL = "http://api.themoviedb.org/3/movie/";
@@ -112,17 +111,11 @@ public class NetworkUtils {
         return url;
     }
 
-    public static URL BuildYoutubeUrl(String videoId){
+    public static Uri BuildYoutubeUrl(String videoId){
         Uri uri = Uri.parse(YOUTUBE_BASE_URL).buildUpon()
                 .appendQueryParameter(VIDEO_PARAM , videoId)
                 .build();
-        URL url = null;
-        try{
-            url = new URL(uri.toString());
-        }catch(MalformedURLException e){
-
-        }
-        return url;
+        return uri;
     }
 
     // Send Request to the MovieDB Api and receive JSON data

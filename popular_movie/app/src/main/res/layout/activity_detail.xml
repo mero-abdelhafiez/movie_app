@@ -1,55 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<ScrollView
+<FrameLayout
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:background="@color/colorLightGrey">
 
+    <ScrollView
 
-    <android.support.constraint.ConstraintLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        tools:context=".DetailActivity"
         android:background="@color/colorLightGrey">
 
-        <include
-            android:id="@+id/detail_top"
-            layout="@layout/activity_detail_top"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            app:layout_constraintTop_toTopOf="parent" />
-        <include
-            android:id="@+id/detail_bottom"
-            layout="@layout/activity_detail_bottom"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="8dp"
-            app:layout_constraintTop_toBottomOf="@id/detail_top"  />
-        <include
-            android:id="@+id/details_trailers"
-            layout="@layout/activity_detail_trailers"
-            android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:layout_margin="8dp"
-            app:layout_constraintTop_toBottomOf="@id/detail_bottom">
 
-        </include>
-
-
-        <Button
-            android:id="@+id/open_reviews_btn"
+        <android.support.constraint.ConstraintLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            xmlns:app="http://schemas.android.com/apk/res-auto"
+            xmlns:tools="http://schemas.android.com/tools"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="2dp"
-            android:text="@string/go_to_reviews"
-            app:layout_constraintTop_toBottomOf="@id/details_trailers"/>
+            tools:context=".DetailActivity"
+            android:background="@color/colorLightGrey">
+
+            <include
+                android:id="@+id/detail_top"
+                layout="@layout/activity_detail_top"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                app:layout_constraintTop_toTopOf="parent" />
+            <include
+                android:id="@+id/detail_bottom"
+                layout="@layout/activity_detail_bottom"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                app:layout_constraintTop_toBottomOf="@id/detail_top"  />
+            <include
+                android:id="@+id/details_trailers"
+                layout="@layout/activity_detail_trailers"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                android:layout_margin="8dp"
+                app:layout_constraintTop_toBottomOf="@id/detail_bottom">
+
+            </include>
 
 
-    </android.support.constraint.ConstraintLayout>
-</ScrollView>
+            <Button
+                android:id="@+id/open_reviews_btn"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:text="@string/go_to_reviews"
+                app:layout_constraintTop_toBottomOf="@id/details_trailers"
+                android:background="@color/colorAccent"
+                android:textColor="@color/colorWhite"
+                />
+
+
+        </android.support.constraint.ConstraintLayout>
+    </ScrollView>
+</FrameLayout>

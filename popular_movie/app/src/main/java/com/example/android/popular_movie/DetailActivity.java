@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +32,7 @@ import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.Review;
 import com.example.android.popular_movie.DataModels.Video;
 import com.example.android.popular_movie.Utilities.JsonUtils;
+import com.example.android.popular_movie.Utilities.LayoutUtilities;
 import com.example.android.popular_movie.Utilities.NetworkUtils;
 import com.example.android.popular_movie.Utilities.ReviewsAdapter;
 import com.example.android.popular_movie.Utilities.TrailersAdapter;
@@ -49,19 +51,17 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     private Movie movie;
     private ImageView mMoviePoster , mMovieBackdrop;
     private TextView mMovieOriginalTitle , mMovieOverview , mMoviePopularity , mMovieGenres , mMovieRatingText;
-    private ImageView mMovieRatingImage;
     private TextView mMovieRatingCount;
+    private ImageView mMovieRatingImage;
     private SharedPreferences sharedPreferences;
-
+    private TextView mAddToFavoritesLabel , mTrailersErrorMessage;
     private CheckBox mAddToFavs;
 
-    private ReviewsAdapter reviewsAdapter;
     private TrailersAdapter trailersAdapter;
 
-    private ProgressBar reviewProgressBar , trailersProgressBar;
-    private RecyclerView mReviewRecyclerView , mTrailersRecyclerView;
+    private RecyclerView  mTrailersRecyclerView;
     private static int TrailersLoaderId = 201;
-    private static int ReviewsLoaderId = 202;
+    private ProgressBar mTrailersProgressBar;
 
     private Button mGoToReviewsButton;
 
@@ -70,16 +70,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
-        Context context = DetailActivity.this;
+        final Context context = DetailActivity.this;
 
         sharedPreferences = context.getSharedPreferences("GenresDataFile",0);
         Intent callingIntent = getIntent();
         if (callingIntent.hasExtra(Intent.EXTRA_TEXT)) {
             movie = (Movie) callingIntent.getParcelableExtra(Intent.EXTRA_TEXT);
         }
-//        }else if(savedInstanceState != null && savedInstanceState.containsKey("movie")){
-//            movie = (Movie) savedInstanceState.getParcelable("movie");
-//        }
 
         // Find the views
         mMoviePoster = findViewById(R.id.iv_movie_poster);
@@ -88,23 +85,33 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mMovieOverview = findViewById(R.id.tv_overview);
         mMoviePopularity = findViewById(R.id.tv_popularity);
         mMovieGenres = findViewById(R.id.tv_genres);
-        mMovieRatingImage = (ImageView)findViewById(R.id.rb_movie_rating);
+        mMovieRatingImage = findViewById(R.id.iv_movie_rating);
         mMovieRatingText = findViewById(R.id.tv_movie_rating);
-        mMovieRatingCount = (TextView) findViewById(R.id.tv_movie_rate_count);
+        mMovieRatingCount =  findViewById(R.id.tv_movie_rate_count);
         //mGoToReviewsButton = (Button) findViewById(R.id.)
-        mAddToFavs = (CheckBox) findViewById(R.id.fav_btn);
+        mTrailersProgressBar = findViewById(R.id.trailer_pb);
+        mTrailersErrorMessage = findViewById(R.id.trailers_error_message_tv);
+        mAddToFavs =  findViewById(R.id.fav_btn);
+        mAddToFavoritesLabel = findViewById(R.id.add_to_fav_lbl);
 
         mAddToFavs.setChecked(getState());
+        if(mAddToFavs.isChecked()){
+            mAddToFavoritesLabel.setText(context.getString(R.string.remove_to_fav_lbl));
+        }else{
+            mAddToFavoritesLabel.setText(context.getString(R.string.add_to_fav_lbl));
+        }
 
         mAddToFavs.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if(isChecked){
                     addMovieToFavorites();
-                    Toast.makeText(DetailActivity.this, "Add To Favs", Toast.LENGTH_SHORT).show();
+                    mAddToFavoritesLabel.setText(context.getString(R.string.remove_to_fav_lbl));
+                    Toast.makeText(DetailActivity.this, "Movie Added To Favorites", Toast.LENGTH_SHORT).show();
                 }else{
-                    Toast.makeText(DetailActivity.this, "Remove From Favs", Toast.LENGTH_SHORT).show();
                     removeMovieFromFavorites();
+                    mAddToFavoritesLabel.setText(context.getString(R.string.add_to_fav_lbl));
+                    Toast.makeText(DetailActivity.this, "Movie Removed From Favorites", Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -119,21 +126,49 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         mTrailersRecyclerView = (RecyclerView) findViewById(R.id.trailers_rv);
 
 
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        int value = displayMetrics.widthPixels;
+        int valueDp = (int) LayoutUtilities.convertPxToDp(this, (float)value);
+
+
         populateFields(movie);
         setTitle(movie.getTitle() + " (" + movie.getYear() + ")");
         getTrailersDataFromAPI();
-
-        RecyclerView.LayoutManager trailersLayoutManager = new LinearLayoutManager(this , LinearLayoutManager.HORIZONTAL , false);
+        boolean IsLarge = valueDp > 600;
+        int Orientation  = LinearLayoutManager.HORIZONTAL;
+        if(IsLarge){
+            Orientation = LinearLayoutManager.VERTICAL;
+        }
+        RecyclerView.LayoutManager trailersLayoutManager = new LinearLayoutManager(this , Orientation , false);
         mTrailersRecyclerView.setLayoutManager(trailersLayoutManager);
         mTrailersRecyclerView.setHasFixedSize(true);
         trailersAdapter = new TrailersAdapter();
         mTrailersRecyclerView.setAdapter(trailersAdapter);
 
+        hideTrailersErrorMessage();
 
         getSupportLoaderManager().initLoader(TrailersLoaderId , null , this);
     }
 
+    private void showTrailersErrorMessage(){
+        mTrailersErrorMessage.setVisibility(View.VISIBLE);
+        mTrailersProgressBar.setVisibility(View.INVISIBLE);
+    }
 
+    private void hideTrailersErrorMessage(){
+        mTrailersErrorMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showTrailersProgressBar(){
+        mTrailersRecyclerView.setVisibility(View.INVISIBLE);
+        mTrailersProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideTrailersProgressBar(){
+        mTrailersRecyclerView.setVisibility(View.VISIBLE);
+        mTrailersProgressBar.setVisibility(View.INVISIBLE);
+    }
     // Get the Trailers Data from the API
     private void getTrailersDataFromAPI(){
         URL url = NetworkUtils.BuildQueryTrailerUrl(Integer.toString(movie.getID()));
@@ -236,18 +271,13 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         intent.putExtra(Intent.EXTRA_TEXT , movie.getID());
         startActivity(intent);
     }
-//
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        outState.putParcelable("movie" ,movie);
-//        super.onSaveInstanceState(outState);
-//    }
 
     // Loader methods to get the trailers data for the movie
     @NonNull
     @Override
     public Loader<String> onCreateLoader(int id, @Nullable final Bundle args) {
         if(id == TrailersLoaderId){
+            showTrailersProgressBar();
             return new AsyncTaskLoader<String>(this) {
                 String mTrailersData = null;
                 @Override
@@ -300,10 +330,14 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         int loaderId = loader.getId();
         if(loaderId == TrailersLoaderId){
+            hideTrailersProgressBar();
             if(data != null && !data.equals("")){
                 Video[] videos = JsonUtils.parseWholeVideosData(data);
                 trailersAdapter.setVideos(videos);
+
                 //trailersProgressBar.setVisibility(View.INVISIBLE);
+            }else{
+                showTrailersErrorMessage();
             }
         }
     }

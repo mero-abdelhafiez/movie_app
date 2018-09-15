@@ -8,6 +8,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import com.example.android.popular_movie.DataModels.Movie;
 import com.example.android.popular_movie.DataModels.Review;
@@ -24,7 +27,8 @@ public class ReviewActivity extends AppCompatActivity implements android.support
 
     private int ReviewsLoaderId = 201;
     private ReviewsAdapter mReviewsAdapter;
-
+    private TextView mReviewsErrorMessage;
+    private ProgressBar mReviewsProgressBar;
     private int mMovieId;
 
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
@@ -44,7 +48,8 @@ public class ReviewActivity extends AppCompatActivity implements android.support
             mMovieId = callingIntent.getIntExtra(Intent.EXTRA_TEXT , 1);
         }
 
-
+        mReviewsErrorMessage = findViewById(R.id.reviews_error_tv);
+        mReviewsProgressBar = findViewById(R.id.reviews_pb);
 
         mReviewsRecyclerView = (RecyclerView) findViewById(R.id.reviews_rv);
 
@@ -54,13 +59,49 @@ public class ReviewActivity extends AppCompatActivity implements android.support
         mReviewsAdapter = new ReviewsAdapter();
         mReviewsRecyclerView.setAdapter(mReviewsAdapter);
 
+        hideReviewsErrorMessage();
+
         getReviewsDataFromAPI();
 
         getSupportLoaderManager().initLoader(ReviewsLoaderId , null , this);
     }
 
+    private void showReviewsErrorMessage(){
+        mReviewsErrorMessage.setVisibility(View.VISIBLE);
+        mReviewsProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void hideReviewsErrorMessage(){
+        mReviewsErrorMessage.setVisibility(View.INVISIBLE);
+    }
+
+    private void showmReviewsProgressBar(){
+        mReviewsRecyclerView.setVisibility(View.INVISIBLE);
+        mReviewsProgressBar.setVisibility(View.VISIBLE);
+    }
+
+    private void hideReviewsProgressBar(){
+        mReviewsRecyclerView.setVisibility(View.VISIBLE);
+        mReviewsProgressBar.setVisibility(View.INVISIBLE);
+    }
+
+    private void getReviewsDataFromAPI(){
+        URL url = NetworkUtils.BuildQueryReviewsUrl(Integer.toString(mMovieId));
+        Bundle bundle = new Bundle();
+        bundle.putString(SEARCH_QUERY_URL_EXTRA , url.toString());
+
+        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
+        Loader<String> reviewsLoader = loaderManager.getLoader(ReviewsLoaderId);
+        if(reviewsLoader != null){
+            loaderManager.restartLoader(ReviewsLoaderId , bundle , this);
+        }else{
+            loaderManager.initLoader(ReviewsLoaderId , bundle , this);
+        }
+    }
+
     @Override
     public Loader<String> onCreateLoader(int id, final Bundle args) {
+        showmReviewsProgressBar();
         if(id == ReviewsLoaderId){
             return new AsyncTaskLoader<String>(this) {
 
@@ -112,28 +153,19 @@ public class ReviewActivity extends AppCompatActivity implements android.support
     }
 
 
-    private void getReviewsDataFromAPI(){
-        URL url = NetworkUtils.BuildQueryReviewsUrl(Integer.toString(mMovieId));
-        Bundle bundle = new Bundle();
-        bundle.putString(SEARCH_QUERY_URL_EXTRA , url.toString());
-
-        android.support.v4.app.LoaderManager loaderManager = getSupportLoaderManager();
-        Loader<String> reviewsLoader = loaderManager.getLoader(ReviewsLoaderId);
-        if(reviewsLoader != null){
-            loaderManager.restartLoader(ReviewsLoaderId , bundle , this);
-        }else{
-            loaderManager.initLoader(ReviewsLoaderId , bundle , this);
-        }
-    }
-
     @Override
     public void onLoadFinished(Loader<String> loader, String data) {
         int loaderId = loader.getId();
         if(loaderId == ReviewsLoaderId){
+            hideReviewsProgressBar();
             if(data != null && !data.equals("")){
                 Review[] reviews = JsonUtils.parseWholeReviewsData(data);
+                if(reviews == null || reviews.length == 0){
+                    showReviewsErrorMessage();
+                }
                 mReviewsAdapter.setReviews(reviews);
-                //reviewProgressBar.setVisibility(View.INVISIBLE);
+            }else{
+                showReviewsErrorMessage();
             }
         }
     }
