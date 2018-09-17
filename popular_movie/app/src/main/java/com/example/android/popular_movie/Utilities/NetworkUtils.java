@@ -19,7 +19,7 @@ public class NetworkUtils {
 
     // Authentication
     //TODO: Add Movie API Authentication Key here
-    private static final String V3KEY = "c1a676d5a618b1591ae9746d3eb8562e";
+    private static final String V3KEY = "";
     private static final String V4KEY = "";
 
     // Base URLS
