@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.content.res.Configuration;
 import android.database.Cursor;
 import android.os.AsyncTask;
+import android.os.Parcelable;
+import android.os.PersistableBundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
@@ -52,8 +54,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
+    private static final String USER_CHOICE_KEY = "UserChoice";
+
     private Context mContext = MainActivity.this;
-    private SharedPreferences sharedPreferences;
+    private SharedPreferences sharedPreferences , rvState;
     private RecyclerView mMoviesRecyclerView;
     private ProgressBar mLoadingBar;
     private TextView mErrorMessage;
@@ -63,17 +67,19 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private Cursor mDataCursor;
 
+    private GridLayoutManager layoutManager;
+
     private int mTitleCol ,mVoteCntCol , mRatingCol , mImageCol , mBacdropCol , mPopularityCol ,
     mGenresCol , mIdCol , mAdultCol , mOverviewCol , mOrigionalTitleCol , mVideoCol , mReleaseDateCol ;
 
     private static int GenresLoaderId = 101;
     private static int MoviesLoaderId = 102;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.d(TAG , "Loading From the start");
-        Log.d(TAG , Integer.toString(UserPreference.getSortType()));
+
         setContentView(R.layout.activity_main);
         Context context = MainActivity.this;
 
@@ -82,6 +88,14 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         if(!sharedPreferences.contains("initialized")){
             getGenresDataFromAPI();
         }
+
+        if(savedInstanceState != null ){
+            if(savedInstanceState.containsKey(USER_CHOICE_KEY)) {
+                UserPreference.setSortType(savedInstanceState.getInt(USER_CHOICE_KEY));
+            }
+        }
+
+
         mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
         mLoadingBar = findViewById(R.id.pb_loading_bar);
         mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
@@ -110,16 +124,18 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                 span = 2;
             }
         }
-
-        GridLayoutManager layoutManager = new GridLayoutManager(this , span);
+        layoutManager = new GridLayoutManager(this , span);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
+//        if(LayoutState != null){
+//            layoutManager.onRestoreInstanceState(LayoutState);
+//        }
         mMoviesRecyclerView.setAdapter(adapter);
-
         hideErrorMessage();
         getSupportLoaderManager().initLoader(MoviesLoaderId , null , this);
         getSupportLoaderManager().initLoader(GenresLoaderId , null , this);
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -155,6 +171,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         int sortType = UserPreference.getSortType();
         if(sortType == 1){
             mPopularityRadio.setChecked(true);
+            mPopularityRadio.setChecked(true);
             mRatingRadio.setChecked(false);
             mFavoritesRadio.setChecked(false);
         }else if(sortType ==2){
@@ -187,7 +204,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
                         break;
                 }
                 getMoviesDataFromAPI();
-
+                layoutManager.scrollToPositionWithOffset(0,0);
                 dialog.dismiss();
             }
         });
@@ -261,6 +278,36 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mLoadingBar.setVisibility(View.INVISIBLE);
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
     }
+
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        rvState = this.getSharedPreferences("RVStateFile",0);
+        SharedPreferences.Editor editor = rvState.edit();
+        int currentVisiblePosition = 0;
+        currentVisiblePosition = layoutManager.findFirstCompletelyVisibleItemPosition();
+        editor.putInt("position" , currentVisiblePosition);
+        editor.apply();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        rvState = this.getSharedPreferences("RVStateFile",0);
+        int currentVisiblePosition  = rvState.getInt("position" , 0);
+        if(layoutManager != null) {
+            layoutManager.scrollToPosition(currentVisiblePosition );
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+        int CurrentUserChoice = UserPreference.getSortType();
+        outState.putInt(USER_CHOICE_KEY , CurrentUserChoice);
+        super.onSaveInstanceState(outState, outPersistentState);
+    }
+
 
     @Override
     public void onClick(Movie movie) {
@@ -365,10 +412,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     @Override
     public void onLoadFinished(@NonNull Loader<String> loader, String data) {
         if(loader.getId() == GenresLoaderId){
-            if(data != null && !data.equals("")){
+            if(data != null && !data.equals("")) {
                 JsonUtils.parseGenreObject(data, MainActivity.this);
-            }else{
-
             }
         }else if(loader.getId() == MoviesLoaderId){
             hideLoadingSpinner();

@@ -18,6 +18,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CheckBox;
@@ -149,6 +150,17 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         hideTrailersErrorMessage();
 
         getSupportLoaderManager().initLoader(TrailersLoaderId , null , this);
+        Log.d(TAG , "Created");
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                onBackPressed();
+                break;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private void showTrailersErrorMessage(){

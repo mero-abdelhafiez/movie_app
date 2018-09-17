@@ -12,12 +12,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name=".MainActivity"
-            android:configChanges="keyboardHidden|orientation" />
+            android:name=".MainActivity" />
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainActivity"
-            android:launchMode="singleTop"/>
+            android:launchMode="singleInstance"/>
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
