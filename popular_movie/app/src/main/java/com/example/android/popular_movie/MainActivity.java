@@ -55,6 +55,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
     private static final String USER_CHOICE_KEY = "UserChoice";
+    private static final String RV_POSITION_KEY = "RvPosition";
 
     private Context mContext = MainActivity.this;
     private SharedPreferences sharedPreferences , rvState;
@@ -248,10 +249,6 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private void getFavoriteMoviesData()
     {
         new FavouriteMoviesDataQuery().execute();
-//        if(FavoriteMovies!= null){
-//            setDataToTheAdapter();
-//            Log.d(TAG , "Data Was Set to the Adapter");
-//        }
     }
 
     private void launchDetailActivity(Movie movie){
@@ -305,9 +302,20 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
         int CurrentUserChoice = UserPreference.getSortType();
         outState.putInt(USER_CHOICE_KEY , CurrentUserChoice);
+        outState.putInt(RV_POSITION_KEY , layoutManager.findFirstCompletelyVisibleItemPosition());
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
+    @Override
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        if(savedInstanceState.containsKey(RV_POSITION_KEY)){
+            int position = savedInstanceState.getInt(RV_POSITION_KEY);
+            if(layoutManager != null){
+                layoutManager.scrollToPosition(position);
+            }
+        }
+    }
 
     @Override
     public void onClick(Movie movie) {
