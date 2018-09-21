@@ -21,19 +21,22 @@ import com.example.android.popular_movie.Utilities.ReviewsAdapter;
 import java.io.IOException;
 import java.net.URL;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class ReviewActivity extends AppCompatActivity implements android.support.v4.app.LoaderManager.LoaderCallbacks<String>{
 
     private static final String TAG = ReviewActivity.class.getSimpleName();
 
     private int ReviewsLoaderId = 201;
     private ReviewsAdapter mReviewsAdapter;
-    private TextView mReviewsErrorMessage;
-    private ProgressBar mReviewsProgressBar;
+    @BindView(R.id.reviews_error_tv) TextView mReviewsErrorMessage;
+    @BindView(R.id.reviews_pb) ProgressBar mReviewsProgressBar;
     private int mMovieId;
 
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
 
-    private RecyclerView mReviewsRecyclerView ;
+    @BindView(R.id.reviews_rv) RecyclerView mReviewsRecyclerView ;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,10 +51,7 @@ public class ReviewActivity extends AppCompatActivity implements android.support
             mMovieId = callingIntent.getIntExtra(Intent.EXTRA_TEXT , 1);
         }
 
-        mReviewsErrorMessage = findViewById(R.id.reviews_error_tv);
-        mReviewsProgressBar = findViewById(R.id.reviews_pb);
-
-        mReviewsRecyclerView = (RecyclerView) findViewById(R.id.reviews_rv);
+        ButterKnife.bind(this);
 
         RecyclerView.LayoutManager reviewsLayoutManager = new LinearLayoutManager(this , LinearLayoutManager.VERTICAL , false);
         mReviewsRecyclerView.setLayoutManager(reviewsLayoutManager);

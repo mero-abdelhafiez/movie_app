@@ -44,28 +44,39 @@ import java.net.URL;
 import java.text.Format;
 import java.text.SimpleDateFormat;
 
+import butterknife.BindDrawable;
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class DetailActivity extends AppCompatActivity implements LoaderManager.LoaderCallbacks<String> {
 
     private static final String TAG = DetailActivity.class.getSimpleName();
 
     private static final String SEARCH_QUERY_URL_EXTRA = "query";
     private Movie movie;
-    private ImageView mMoviePoster , mMovieBackdrop;
-    private TextView mMovieOriginalTitle , mMovieOverview , mMoviePopularity , mMovieGenres , mMovieRatingText;
-    private TextView mMovieRatingCount;
-    private ImageView mMovieRatingImage;
+    @BindView(R.id.iv_movie_poster) ImageView mMoviePoster;
+    @BindView(R.id.iv_movie_backdrop) ImageView mMovieBackdrop;
+    @BindView(R.id.tv_original_name ) TextView mMovieOriginalTitle;
+    @BindView(R.id.tv_overview) TextView mMovieOverview ;
+    @BindView(R.id.tv_popularity) TextView mMoviePopularity ;
+    @BindView(R.id.tv_genres) TextView mMovieGenres ;
+    @BindView(R.id.tv_movie_rating) TextView mMovieRatingText;
+    @BindView(R.id.tv_movie_rate_count) TextView mMovieRatingCount;
+    @BindView(R.id.iv_movie_rating) ImageView mMovieRatingImage;
     private SharedPreferences sharedPreferences;
-    private TextView mAddToFavoritesLabel , mTrailersErrorMessage;
-    private CheckBox mAddToFavs;
+    @BindView(R.id.add_to_fav_lbl) TextView mAddToFavoritesLabel;
+    @BindView(R.id.trailers_error_message_tv) TextView mTrailersErrorMessage;
+    @BindView(R.id.fav_btn) CheckBox mAddToFavs;
 
     private TrailersAdapter trailersAdapter;
 
-    private RecyclerView  mTrailersRecyclerView;
+    @BindView(R.id.trailers_rv) RecyclerView  mTrailersRecyclerView;
+
+    @BindView(R.id.trailer_pb) ProgressBar mTrailersProgressBar;
+
+    @BindView(R.id.open_reviews_btn) Button mGoToReviewsButton;
+
     private static int TrailersLoaderId = 201;
-    private ProgressBar mTrailersProgressBar;
-
-    private Button mGoToReviewsButton;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -80,20 +91,7 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
         }
 
         // Find the views
-        mMoviePoster = findViewById(R.id.iv_movie_poster);
-        mMovieBackdrop = findViewById(R.id.iv_movie_backdrop);
-        mMovieOriginalTitle = findViewById(R.id.tv_original_name);
-        mMovieOverview = findViewById(R.id.tv_overview);
-        mMoviePopularity = findViewById(R.id.tv_popularity);
-        mMovieGenres = findViewById(R.id.tv_genres);
-        mMovieRatingImage = findViewById(R.id.iv_movie_rating);
-        mMovieRatingText = findViewById(R.id.tv_movie_rating);
-        mMovieRatingCount =  findViewById(R.id.tv_movie_rate_count);
-        //mGoToReviewsButton = (Button) findViewById(R.id.)
-        mTrailersProgressBar = findViewById(R.id.trailer_pb);
-        mTrailersErrorMessage = findViewById(R.id.trailers_error_message_tv);
-        mAddToFavs =  findViewById(R.id.fav_btn);
-        mAddToFavoritesLabel = findViewById(R.id.add_to_fav_lbl);
+        ButterKnife.bind(this);
 
         mAddToFavs.setChecked(getState());
         if(mAddToFavs.isChecked()){
@@ -117,15 +115,12 @@ public class DetailActivity extends AppCompatActivity implements LoaderManager.L
             }
         });
 
-        mGoToReviewsButton = (Button) findViewById(R.id.open_reviews_btn);
         mGoToReviewsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 openReviewsActivity();
             }
         });
-        mTrailersRecyclerView = (RecyclerView) findViewById(R.id.trailers_rv);
-
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);

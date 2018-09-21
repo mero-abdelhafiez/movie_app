@@ -12,7 +12,7 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
     public static String DBName = "movies.db";
 
-    public static int DBVersion = 1;
+    public static int DBVersion = 2;
 
     public MovieDBHelper(Context context){
         super(context , DBName , null , DBVersion);
@@ -39,8 +39,12 @@ public class MovieDBHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        final String UPDATE_TABLE_MOVIES = "DROP TABLE IF EXISTS "  + FavoriteListContract.FavoriteListEntry.TABLE_NAME + " ;";
-        db.execSQL(UPDATE_TABLE_MOVIES);
-        onCreate(db);
+        // Can't think of any table I want to add , the new_column is just for testing
+        final String ALERT_TABLE_MOVIES = "ALTER TABLE "
+                + FavoriteListContract.FavoriteListEntry.TABLE_NAME + " ADD COLUMN new_column string;";
+
+        if(oldVersion < 2){
+            db.execSQL(ALERT_TABLE_MOVIES);
+        }
     }
 }

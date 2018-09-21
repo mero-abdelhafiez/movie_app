@@ -48,6 +48,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
+
 public class MainActivity extends AppCompatActivity implements MoviesAdapter.MoviesAdapterOnClickHandler , LoaderManager.LoaderCallbacks<String>  {
 
     private static final String TAG = MainActivity.class.getSimpleName();
@@ -59,11 +62,10 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
 
     private Context mContext = MainActivity.this;
     private SharedPreferences sharedPreferences , rvState;
-    private RecyclerView mMoviesRecyclerView;
-    private ProgressBar mLoadingBar;
-    private TextView mErrorMessage;
+    @BindView(R.id.rv_movies) RecyclerView mMoviesRecyclerView;
+    @BindView(R.id.pb_loading_bar) ProgressBar mLoadingBar;
+    @BindView(R.id.tv_error_message) TextView mErrorMessage;
     private MoviesAdapter adapter;
-    private boolean IsLand = false;
     private Movie[] FavoriteMovies;
 
     private Cursor mDataCursor;
@@ -76,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
     private static int GenresLoaderId = 101;
     private static int MoviesLoaderId = 102;
 
+    int CurrentPosition = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -96,13 +99,8 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             }
         }
 
-
-        mMoviesRecyclerView = (RecyclerView) findViewById(R.id.rv_movies);
-        mLoadingBar = findViewById(R.id.pb_loading_bar);
-        mErrorMessage = (TextView) findViewById(R.id.tv_error_message);
+        ButterKnife.bind(this);
         getMoviesDataFromAPI();
-
-        int span = 2;
 
         DisplayMetrics displayMetrics = new DisplayMetrics();
         getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
@@ -110,33 +108,30 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         int valueDp = (int) LayoutUtilities.convertPxToDp(this, (float)value);
 
         boolean IsLargeScreen = (valueDp > 600);
-        IsLand = (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE) ? true:false;
-
-
+        int span , scalingFactor;
         if(IsLargeScreen){
-            span = 3;
-            if(valueDp > 820){
-                span = 4;
-            }
+            scalingFactor = 200;
         }else {
-            if (IsLand) {
-                span = 3;
-            } else {
-                span = 2;
-            }
+            scalingFactor = 150;
         }
+        span = calculateNoOfColumns(this , scalingFactor);
         layoutManager = new GridLayoutManager(this , span);
         mMoviesRecyclerView.setLayoutManager(layoutManager);
         adapter = new MoviesAdapter(this);
-//        if(LayoutState != null){
-//            layoutManager.onRestoreInstanceState(LayoutState);
-//        }
         mMoviesRecyclerView.setAdapter(adapter);
         hideErrorMessage();
         getSupportLoaderManager().initLoader(MoviesLoaderId , null , this);
         getSupportLoaderManager().initLoader(GenresLoaderId , null , this);
     }
 
+    public static int calculateNoOfColumns(Context context , int scalingFactor) {
+        DisplayMetrics displayMetrics = context.getResources().getDisplayMetrics();
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        int noOfColumns = (int) (dpWidth / scalingFactor);
+        if(noOfColumns < 2)
+            noOfColumns = 2;
+        return noOfColumns;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -276,45 +271,33 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
         mMoviesRecyclerView.setVisibility(View.VISIBLE);
     }
 
-
     @Override
-    protected void onPause() {
-        super.onPause();
+    protected void onSaveInstanceState(Bundle outState) {
         rvState = this.getSharedPreferences("RVStateFile",0);
         SharedPreferences.Editor editor = rvState.edit();
         int currentVisiblePosition = 0;
-        currentVisiblePosition = layoutManager.findFirstCompletelyVisibleItemPosition();
+        currentVisiblePosition = layoutManager.findFirstVisibleItemPosition();
         editor.putInt("position" , currentVisiblePosition);
         editor.apply();
+        super.onSaveInstanceState(outState);
     }
+
+//    @Override
+//    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+//        super.onRestoreInstanceState(savedInstanceState);
+//
+//        if(savedInstanceState.containsKey(RV_POSITION_KEY)){
+//            int position = savedInstanceState.getInt(RV_POSITION_KEY);
+//            CurrentPosition = position;
+//        }
+//    }
 
     @Override
     protected void onResume() {
         super.onResume();
         rvState = this.getSharedPreferences("RVStateFile",0);
         int currentVisiblePosition  = rvState.getInt("position" , 0);
-        if(layoutManager != null) {
-            layoutManager.scrollToPosition(currentVisiblePosition );
-        }
-    }
-
-    @Override
-    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-        int CurrentUserChoice = UserPreference.getSortType();
-        outState.putInt(USER_CHOICE_KEY , CurrentUserChoice);
-        outState.putInt(RV_POSITION_KEY , layoutManager.findFirstCompletelyVisibleItemPosition());
-        super.onSaveInstanceState(outState, outPersistentState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        super.onRestoreInstanceState(savedInstanceState);
-        if(savedInstanceState.containsKey(RV_POSITION_KEY)){
-            int position = savedInstanceState.getInt(RV_POSITION_KEY);
-            if(layoutManager != null){
-                layoutManager.scrollToPosition(position);
-            }
-        }
+        CurrentPosition = currentVisiblePosition;
     }
 
     @Override
@@ -428,7 +411,7 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             if(data != null && !data.equals("")){
                 Movie[] movies = JsonUtils.parseWholeMoviesData(data);
                 adapter.setMovies(movies);
-
+                layoutManager.scrollToPositionWithOffset(CurrentPosition , 0);
             }else{
                 mErrorMessage.setText(mContext.getString(R.string.error_message));
                 showErrorMessage();
@@ -527,11 +510,11 @@ public class MainActivity extends AppCompatActivity implements MoviesAdapter.Mov
             }
         }
         hideLoadingSpinner();
-
     }
 
     private void setDataToTheAdapter(){
         adapter.setMovies(FavoriteMovies);
+        layoutManager.scrollToPosition(CurrentPosition);
     }
     @Override
     protected void onDestroy() {

@@ -16,7 +16,7 @@
         <activity
             android:name=".DetailActivity"
             android:parentActivityName=".MainActivity"
-            android:launchMode="singleInstance"/>
+            android:launchMode="singleTop"/>
         <activity
             android:name=".SplashActivity"
             android:theme="@style/SplashTheme">
